@@ -11,5 +11,4 @@ lazy_static = "1.5.0"
 dashmap = "6.1.0"
 tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.20", features = ["env-filter"] }
-
 dotenv = "0.15.0"
