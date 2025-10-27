@@ -1,0 +1,1 @@
+docker build -t gooddaywishes/hyperion-server:latest .
