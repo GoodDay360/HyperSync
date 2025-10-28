@@ -16,5 +16,5 @@ RUN cargo build --release
 # We do not need the Rust toolchain to run the binary!
 FROM debian:bookworm-slim AS runtime
 WORKDIR /app
-COPY --from=builder /app/target/release/HyperionServer /usr/local/bin
-ENTRYPOINT ["/usr/local/bin/HyperionServer"]
+COPY --from=builder /app/target/release/HyperSync /usr/local/bin
+ENTRYPOINT ["/usr/local/bin/HyperSync"]
