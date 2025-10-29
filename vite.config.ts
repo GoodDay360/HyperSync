@@ -1,27 +1,56 @@
-/// <reference types="vitest" />
-/// <reference types="vite/client" />
+import { defineConfig } from "vite";
+import solid from "vite-plugin-solid";
+import solidPlugin from "vite-plugin-solid";
+import suidPlugin from "@suid/vite-plugin";
+import webfontDownload from 'vite-plugin-webfont-dl';
+import eslint from '@nabla/vite-plugin-eslint'
 
-import { defineConfig } from 'vite';
-import solidPlugin from 'vite-plugin-solid';
-import devtools from 'solid-devtools/vite';
+import { fileURLToPath } from 'url';
+import { dirname, resolve } from 'path';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-export default defineConfig({
-  plugins: [devtools(), solidPlugin()],
-  server: {
-    port: 3000,
-  },
-  test: {
-    environment: 'jsdom',
-    globals: false,
-    setupFiles: ['node_modules/@testing-library/jest-dom/vitest'],
-    // if you have few tests, try commenting this
-    // out to improve performance:
-    isolate: false,
-  },
+const host = process.env.TAURI_DEV_HOST;
+
+// https://vite.dev/config/
+export default defineConfig(async ({command, mode}) => ({
+  plugins: [...(mode === 'production' ? [eslint()] : []), solid(), solidPlugin(), suidPlugin(), webfontDownload()],
+
   build: {
-    target: 'esnext',
+    target: "esnext",
   },
+
+  // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
+  //
+  // 1. prevent Vite from obscuring rust errors
+  clearScreen: false,
+  // 2. tauri expects a fixed port, fail if that port is not available
+  server: {
+    port: 1420,
+    strictPort: true,
+    host: host || false,
+    hmr: host
+      ? {
+          protocol: "ws",
+          host,
+          port: 1421,
+        }
+      : undefined,
+    watch: {
+      // 3. tell Vite to ignore watching `src`
+      ignored: ["**/src**"],
+    },
+  },
+
+  esbuild: {
+    drop: command === "build" 
+      ? ["console", "debugger"] as ("console" | "debugger")[] 
+      : [],
+  },
+
   resolve: {
-    conditions: ['development', 'browser'],
+    alias: {
+      "@src": resolve(__dirname, "./src")
+    }
   },
-});
+}));
