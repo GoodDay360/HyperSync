@@ -16,7 +16,7 @@ impl MigrationTrait for Migration {
                     .col(string(User::Username).not_null())
                     .col(string(User::Password).not_null())
                     .col(string(User::Token).unique_key().not_null())
-                    .col(integer(User::Timestamp).unique_key().not_null())
+                    .col(big_integer(User::Timestamp).unique_key().not_null())
                     .to_owned(),
             )
             .await

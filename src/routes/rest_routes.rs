@@ -3,10 +3,12 @@ use axum::{
     Router,
 };
 
+use crate::rest_methods;
+
 pub async fn new(app: Router) -> Result<(), String> {
 
     let _ = app
-        .route("/", get(|| async { "Hello, World!" }));
+        .route("/login", get(rest_methods::login::new));
 
     return Ok(());
 }
