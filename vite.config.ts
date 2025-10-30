@@ -3,7 +3,7 @@ import solid from "vite-plugin-solid";
 import solidPlugin from "vite-plugin-solid";
 import suidPlugin from "@suid/vite-plugin";
 import webfontDownload from 'vite-plugin-webfont-dl';
-import eslint from '@nabla/vite-plugin-eslint'
+import eslint from 'vite-plugin-eslint'
 
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
@@ -13,44 +13,47 @@ const __dirname = dirname(__filename);
 const host = process.env.TAURI_DEV_HOST;
 
 // https://vite.dev/config/
-export default defineConfig(async ({command, mode}) => ({
-  plugins: [...(mode === 'production' ? [eslint()] : []), solid(), solidPlugin(), suidPlugin(), webfontDownload()],
-
-  build: {
-    target: "esnext",
-  },
-
-  // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
-  //
-  // 1. prevent Vite from obscuring rust errors
-  clearScreen: false,
-  // 2. tauri expects a fixed port, fail if that port is not available
-  server: {
-    port: 1420,
-    strictPort: true,
-    host: host || false,
-    hmr: host
-      ? {
-          protocol: "ws",
-          host,
-          port: 1421,
-        }
-      : undefined,
-    watch: {
-      // 3. tell Vite to ignore watching `src`
-      ignored: ["**/src**"],
+export default defineConfig(async ({command, mode}) => {
+  console.log(`Running command "${command}" for "${mode}".`)
+  return {
+    plugins: [...(mode === 'production' ? [eslint()] : []), solid(), solidPlugin(), suidPlugin(), webfontDownload()],
+    exclude: ['node_modules', 'dist'],
+    build: {
+      target: "esnext",
     },
-  },
 
-  esbuild: {
-    drop: command === "build" 
-      ? ["console", "debugger"] as ("console" | "debugger")[] 
-      : [],
-  },
+    // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
+    //
+    // 1. prevent Vite from obscuring rust errors
+    clearScreen: false,
+    // 2. tauri expects a fixed port, fail if that port is not available
+    server: {
+      port: 1420,
+      strictPort: true,
+      host: host || false,
+      hmr: host
+        ? {
+            protocol: "ws",
+            host,
+            port: 1421,
+          }
+        : undefined,
+      watch: {
+        // 3. tell Vite to ignore watching `src`
+        ignored: ["**/src/**"],
+      },
+    },
 
-  resolve: {
-    alias: {
-      "@src": resolve(__dirname, "./src")
-    }
-  },
-}));
+    esbuild: {
+      drop: command === "build" 
+        ? ["console", "debugger"] as ("console" | "debugger")[] 
+        : [],
+    },
+
+    resolve: {
+      alias: {
+        "@src": resolve(__dirname, "./src-frontend")
+      }
+    },
+  }
+});

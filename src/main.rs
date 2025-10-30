@@ -6,16 +6,22 @@ use tower_http::services::{ServeDir, ServeFile};
 use std::net::SocketAddr;
 use axum::{
     Router,
+    http::Method
 };
 use tower_governor::{
     governor::GovernorConfigBuilder, GovernorLayer,
     key_extractor::SmartIpKeyExtractor,
 };
+use tower_http::cors::{CorsLayer, Any};
+
 use tokio::{self, time::Duration};
+use std::sync::Arc;
+use std::env;
 
 pub mod entities;
 pub mod utils;
 pub mod configs;
+pub mod models;
 
 mod routes;
 mod rest_methods;
@@ -33,12 +39,7 @@ async fn main() {
     /* --- */
 
     /* Load Environment Variables For Debug Mode */
-    #[cfg(debug_assertions)]
-    {
-        use dotenv::dotenv;
-        dotenv().ok();
-        info!("[dotenv] Loaded .env in debug mode");
-    }
+    configs::env::EnvConfig::init();
     /* --- */
 
     
@@ -73,23 +74,26 @@ async fn main() {
         }
     });
 
-    let app = Router::new()
+    
+
+    let mut app = Router::new()
         .merge(
             Router::new()
-                .route_service("/", ServeFile::new("./dist/index.html"))
+                .nest_service("/admin", ServeFile::new("./dist/index.html"))
                 .nest_service("/assets", ServeDir::new("./dist/assets"))
                 .layer(GovernorLayer::new(governor_conf))
         );
         
         
+        
 
-    match routes::rest_routes::new(app.clone()).await {
-        Ok(_) => {},
+    app = match routes::rest_routes::new(app.clone()).await {
+        Ok(app) => {app},
         Err(e) => {
             error!("[REST ROUTES] {}", e);
             std::process::exit(0);
         },
-    }
+    };
     // match routes::socket_routes::new(app.clone()).await {
     //     Ok(_) => {},
     //     Err(e) => {
@@ -98,6 +102,13 @@ async fn main() {
     //     },
     // }
     /* --- */
+
+    let cors = CorsLayer::new()
+        .allow_origin(Any)
+        .allow_methods([Method::GET, Method::POST, Method::OPTIONS])
+        .allow_headers(Any);
+
+    app = app.layer(cors);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app.into_make_service_with_connect_info::<SocketAddr>()).await.unwrap();

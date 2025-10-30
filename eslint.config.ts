@@ -7,7 +7,7 @@ import solid from 'eslint-plugin-solid'
 export default [
     js.configs.recommended,
     {
-        files: ['src/**/*.{ts,tsx}'],
+        files: ['src-frontend/**/*.{ts,tsx}'],
         languageOptions: {
             parser,
             parserOptions: {

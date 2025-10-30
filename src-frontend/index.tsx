@@ -1,14 +1,13 @@
-import { render } from 'solid-js/web';
-import 'solid-devtools';
+/* @refresh reload */
+import { render } from "solid-js/web";
+import { Router, Route, useNavigate } from "@solidjs/router";
 
-import App from './app/components/app';
 
-const root = document.getElementById('root');
+import App from "@src/app/components/app";
 
-if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
-  throw new Error(
-    'Root element not found. Did you forget to add it to your index.html? Or maybe the id attribute got misspelled?',
-  );
-}
 
-render(() => <App />, root!);
+render(() => (
+    <Router>
+        <Route path="/admin" component={App}/>
+    </Router>
+), document.getElementById("root") as HTMLElement);

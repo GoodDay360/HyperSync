@@ -31,5 +31,6 @@
       "@src/*": ["./src-frontend/*"],
     }
   },
-  "include": ["src-frontend/types"]
+  "include": ["src-frontend/", "src-frontend/types"],
+  "references": [{ "path": "./tsconfig.node.json" }]
 }
