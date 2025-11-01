@@ -3,7 +3,7 @@ use axum::{
     Router,
 };
 
-use crate::rest_methods::{admin};
+use crate::rest_methods::{admin, user};
 
 pub async fn new(app: Router) -> Result<Router, String> {
 
@@ -11,6 +11,13 @@ pub async fn new(app: Router) -> Result<Router, String> {
         .nest("/admin", Router::new()
             .route("/login", post(admin::login::new))
             .route("/verify", post(admin::verify::new))
+            .route("/create_user", post(admin::create_user::new))
+        )
+        .nest("/user", Router::new()
+            .route("/login", post(user::login::new))
+            .nest("/favorite", Router::new()
+                .route("/add", post(user::favorite::add::new))
+            )
         )
         
     );

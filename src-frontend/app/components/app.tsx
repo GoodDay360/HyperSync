@@ -26,11 +26,12 @@ const theme = createTheme({
 });
 
 
+
+
 export default function App() {
     const navigate = useNavigate();
 
     const [is_loading, set_is_loading] = createSignal(true);
-    const [is_logged_in, set_is_logged_in] = createSignal(false);
 
     const [admin_username, set_admin_username] = createSignal("");
     const [admin_password, set_admin_password] = createSignal("");
@@ -39,16 +40,15 @@ export default function App() {
         verify_admin_login()
             .then((state) => {
                 if (state) {
-                    set_is_logged_in(true);
                     navigate("/admin/dashboard");
                 }else{
-                    set_is_logged_in(false);
+                    navigate("/admin");
                 }
                 set_is_loading(false);
             })
             .catch(err => {
                 console.error(err);
-                set_is_logged_in(false);
+                navigate("/admin");
                 set_is_loading(false);
             })
     })
@@ -75,63 +75,57 @@ export default function App() {
                     <CircularProgress color="primary" />
                 </div>
             }
-
+            
             {!is_loading() && 
-                <>{is_logged_in() 
-                    ? <>
-                        <Route path="/dashboard" component={undefined} />
-                    </>
-                    : <div class={styles.container}>
-                        <form class={styles.form_container}
-                            onSubmit={(e)=>{
-                                e.preventDefault();
-                                admin_login(admin_username(), admin_password())
-                                    .then(() => {
-                                        set_is_logged_in(true);
-                                        navigate("/admin/dashboard");
-                                    })
-                                    .catch(err => {
-                                        toast.remove();
-                                        toast.error(err, {style:{color:"red"}});
-                                    });
-                            }}
-                        >
-                            <h2 class={styles.form_title}>Admin</h2>
-                            <div class={styles.input_box}>
-                                <TextField label="Username" variant="filled" required
-                                    
-                                    sx={{
-                                        "& .MuiInputLabel-root": {
-                                            color:"var(--color-1)"
-                                        }
-                                    }}
-                                    inputProps={{ style: { color: "var(--color-1)" } }}
-                                    value={admin_username()}
-                                    onChange={(e)=>{
-                                        set_admin_username(e.target.value);
-                                    }}
-                                />
-                                <TextField label="Password" variant="filled" type="password" required
-                                    sx={{
-                                        "& .MuiInputLabel-root": {
-                                            color:"var(--color-1)"
-                                        }
-                                    }}
-                                    inputProps={{ style: { color: "var(--color-1)" } }}
-                                    value={admin_password()}
-                                    onChange={(e)=>{
-                                        set_admin_password(e.target.value);
-                                    }}
-                                />
-                                <Button variant="contained" color="primary" type="submit"
-                                    sx={{
-                                        fontSize: "calc((100vw + 100vh)/2*0.015)"
-                                    }}
-                                >Login</Button>
-                            </div>
-                        </form>
-                    </div>
-                }</>
+                <div class={styles.container}>
+                    <form class={styles.form_container}
+                        onSubmit={(e)=>{
+                            e.preventDefault();
+                            admin_login(admin_username(), admin_password())
+                                .then(() => {
+                                    navigate("/admin/dashboard");
+                                })
+                                .catch(err => {
+                                    toast.remove();
+                                    toast.error(err, {style:{color:"red"}});
+                                });
+                        }}
+                    >
+                        <h2 class={styles.form_title}>Admin</h2>
+                        <div class={styles.input_box}>
+                            <TextField label="Username" variant="filled" required
+                                
+                                sx={{
+                                    "& .MuiInputLabel-root": {
+                                        color:"var(--color-1)"
+                                    }
+                                }}
+                                inputProps={{ style: { color: "var(--color-1)" } }}
+                                value={admin_username()}
+                                onChange={(e)=>{
+                                    set_admin_username(e.target.value);
+                                }}
+                            />
+                            <TextField label="Password" variant="filled" type="password" required
+                                sx={{
+                                    "& .MuiInputLabel-root": {
+                                        color:"var(--color-1)"
+                                    }
+                                }}
+                                inputProps={{ style: { color: "var(--color-1)" } }}
+                                value={admin_password()}
+                                onChange={(e)=>{
+                                    set_admin_password(e.target.value);
+                                }}
+                            />
+                            <Button variant="contained" color="primary" type="submit"
+                                sx={{
+                                    fontSize: "calc((100vw + 100vh)/2*0.015)"
+                                }}
+                            >Login</Button>
+                        </div>
+                    </form>
+                </div>
             }
 
 

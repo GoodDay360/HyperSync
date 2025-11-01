@@ -11,6 +11,7 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(Favorite::Table)
                     .if_not_exists()
+                    .col(string(Favorite::FavoriteId).unique_key().not_null().primary_key())
                     .col(string(Favorite::UserId).not_null())
                     .col(string(Favorite::Source).not_null())
                     .col(string(Favorite::Id).not_null())
@@ -18,7 +19,14 @@ impl MigrationTrait for Migration {
                     .col(integer(Favorite::CurrentWatchSeasonIndex))
                     .col(integer(Favorite::CurrentWatchEpisodeIndex))
                     .col(big_integer(Favorite::Timestamp))
-                    .primary_key(Index::create().col(Favorite::Source).col(Favorite::Id))
+                    .index(
+                        Index::create()
+                            .name("source_id")
+                            .col(Favorite::Source)
+                            .col(Favorite::Id)
+                            .unique()
+
+                    )
                     .foreign_key(
                         ForeignKey::create()
                             .from(Favorite::Table, Favorite::UserId)
@@ -39,6 +47,7 @@ enum User {
 #[derive(DeriveIden)]
 enum Favorite {
     Table,
+    FavoriteId,
     UserId,
     Source,
     Id,

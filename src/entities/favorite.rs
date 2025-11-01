@@ -5,10 +5,10 @@ use sea_orm::entity::prelude::*;
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
 #[sea_orm(table_name = "favorite")]
 pub struct Model {
+    #[sea_orm(primary_key, auto_increment = false, unique)]
+    pub favorite_id: String,
     pub user_id: String,
-    #[sea_orm(primary_key, auto_increment = false)]
     pub source: String,
-    #[sea_orm(primary_key, auto_increment = false)]
     pub id: String,
     pub tags: Json,
     pub current_watch_season_index: i32,
