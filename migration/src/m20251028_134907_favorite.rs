@@ -21,7 +21,8 @@ impl MigrationTrait for Migration {
                     .col(big_integer(Favorite::Timestamp))
                     .index(
                         Index::create()
-                            .name("source_id")
+                            .name("userid_source_id")
+                            .col(Favorite::UserId)
                             .col(Favorite::Source)
                             .col(Favorite::Id)
                             .unique()
