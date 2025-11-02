@@ -25,7 +25,7 @@ use crate::utils::database;
 use crate::configs::env::EnvConfig;
 use crate::models::error::ErrorResponse;
 use crate::utils::encrypt;
-use crate::rest_methods::admin;
+use crate::methods::rest::{admin};
 
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

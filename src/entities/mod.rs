@@ -4,3 +4,4 @@ pub mod prelude;
 
 pub mod favorite;
 pub mod user;
+pub mod watch_state;

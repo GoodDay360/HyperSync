@@ -3,6 +3,12 @@ name = "HyperSync"
 version = "0.1.0"
 edition = "2024"
 
+[profile.release]
+opt-level = 3 
+lto = true 
+strip = true
+codegen-units = 1
+
 
 [dependencies]
 migration = { path = "migration" }
@@ -16,7 +22,7 @@ sea-orm = { version = "1.1.17", features = [
     "macros" 
 ] }
 lazy_static = "1.5.0"
-dashmap = "6.1.0"
+dashmap = { version = "6.1.0", features = ["serde"] }
 tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.20", features = ["env-filter"] }
 dotenv = "0.15.0"
@@ -30,3 +36,6 @@ rand = "0.9.2"
 base64 = "0.22.1"
 uuid = { version = "1.4", features = ["v7"] }
 chrono = "0.4.42"
+socketioxide = {version = "0.18.0",features = ["extensions", "state"]}
+tower-layer = "0.3.3"
+sea-query = "0.32.7"

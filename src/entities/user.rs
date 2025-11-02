@@ -21,11 +21,19 @@ pub struct Model {
 pub enum Relation {
     #[sea_orm(has_many = "super::favorite::Entity")]
     Favorite,
+    #[sea_orm(has_many = "super::watch_state::Entity")]
+    WatchState,
 }
 
 impl Related<super::favorite::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Favorite.def()
+    }
+}
+
+impl Related<super::watch_state::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::WatchState.def()
     }
 }
 

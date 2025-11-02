@@ -1,0 +1,59 @@
+
+use lazy_static::lazy_static;
+use dashmap::DashMap;
+use tokio::{self, time::{Duration, sleep}};
+use chrono::Utc;
+use serde::{Deserialize, Serialize};
+use tracing::error;
+
+
+#[derive(Deserialize, Serialize, Debug, Clone)]
+pub struct UserState {
+    pub user_id: String,
+    pub last_use_count: usize,
+    pub last_use_timestamp: usize,
+    pub timestamp: usize
+}
+
+lazy_static! {
+    // <user_token, UserState>
+    pub static ref AUTH_USER: DashMap<String, UserState> = DashMap::new();
+}
+
+const MAX_LIFE: usize = 5 * 60 * 1000;
+
+const MAX_PER_USE_COUNT: usize = 5;
+const MAX_PER_USE_INTERVAL: usize = 10 * 1000;
+
+
+impl AUTH_USER {
+    pub fn spawn_worker() {
+        tokio::spawn(async move {
+            loop {
+                AUTH_USER.retain(|_, v| (Utc::now().timestamp_millis() as usize) - (*v).timestamp <= MAX_LIFE);
+                sleep(Duration::from_secs(5)).await;
+            }
+        });
+    }
+    
+    pub fn verify(token: &str) -> Result<UserState, String> {
+        if let Some(mut auth_user) = AUTH_USER.get_mut(token) {
+            let current_timpstamp = Utc::now().timestamp_millis() as usize;
+            if (current_timpstamp - (*auth_user).timestamp) <= MAX_LIFE {
+                if current_timpstamp - (*auth_user).last_use_timestamp <= MAX_PER_USE_INTERVAL {
+                    if (*auth_user).last_use_count < MAX_PER_USE_COUNT {
+                        (*auth_user).last_use_count += 1;
+                        return Ok(auth_user.clone());
+                    }
+                }else{
+                    (*auth_user).last_use_count = 0;
+                    (*auth_user).last_use_timestamp = current_timpstamp;
+                    return Ok(auth_user.clone());
+                }
+            }
+        }
+
+        error!("[verify_user] Invalid token");
+        return Err("Invalid token".to_string())?;
+    }
+}

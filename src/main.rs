@@ -1,6 +1,6 @@
 use sea_orm::{DatabaseConnection, Database, Statement, ConnectionTrait};
 use lazy_static::lazy_static;
-use tracing_subscriber::{fmt, EnvFilter};
+use tracing_subscriber::FmtSubscriber;
 use tracing::{error, info};
 use tower_http::services::{ServeDir, ServeFile};
 use std::net::SocketAddr;
@@ -14,6 +14,11 @@ use tower_governor::{
 };
 use tower_http::cors::{CorsLayer, Any};
 
+use socketioxide::{
+    extract::{AckSender, Data, SocketRef},
+    SocketIo,
+};
+
 use tokio::{self, time::Duration};
 use std::sync::Arc;
 use std::env;
@@ -23,8 +28,9 @@ pub mod utils;
 pub mod configs;
 pub mod models;
 
-mod routes;
-mod rest_methods;
+pub mod routes;
+pub mod methods;
+
 
 
 
@@ -33,9 +39,8 @@ mod rest_methods;
 #[tokio::main]
 async fn main() {
     /* Initialize Logger */
-    fmt()
-        .with_env_filter(EnvFilter::new("info")) 
-        .init();
+    let subscriber = FmtSubscriber::new();
+    tracing::subscriber::set_global_default(subscriber).unwrap();
     /* --- */
 
     /* Load Environment Variables For Debug Mode */
@@ -55,7 +60,7 @@ async fn main() {
     }
     /* --- */
     
-    /* Setup Routes */
+    /* Setup Rest Routes */
     let governor_conf = GovernorConfigBuilder::default()
         .period(Duration::from_secs(10))
         .burst_size(30)
@@ -87,21 +92,35 @@ async fn main() {
         
         
 
-    app = match routes::rest_routes::new(app.clone()).await {
+    app = match routes::rest::new(app.clone()).await {
         Ok(app) => {app},
         Err(e) => {
             error!("[REST ROUTES] {}", e);
             std::process::exit(0);
         },
     };
-    // match routes::socket_routes::new(app.clone()).await {
-    //     Ok(_) => {},
-    //     Err(e) => {
-    //         eprintln!("{}", e);
-    //         std::process::exit(0);
-    //     },
-    // }
     /* --- */
+
+    /* Setup Socket Route */
+    let (socket_layer, socket_io) = SocketIo::builder()
+        .max_payload(3 * 1024)
+        .build_layer();
+    
+
+    match routes::socket::new(socket_io) {
+        Ok(_) => {},
+        Err(e) => {
+            error!("[SOCKET ROUTES] {}", e);
+            std::process::exit(0);
+        },
+    }
+
+    app = app.layer(socket_layer);
+
+    /* --- */
+    
+
+    /* Setup CORS */
 
     let cors = CorsLayer::new()
         .allow_origin(Any)
@@ -109,7 +128,15 @@ async fn main() {
         .allow_headers(Any);
 
     app = app.layer(cors);
+    /* --- */
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    /* Spawn Workers */
+    
+    models::auth_user::AUTH_USER::spawn_worker();
+    models::watch_state::CACHE_WATCH_STATE::spawn_worker();
+
+    /* --- */
+    let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
+    let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
     axum::serve(listener, app.into_make_service_with_connect_info::<SocketAddr>()).await.unwrap();
 }
