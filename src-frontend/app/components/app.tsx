@@ -94,7 +94,6 @@ export default function App() {
                         <h2 class={styles.form_title}>Admin</h2>
                         <div class={styles.input_box}>
                             <TextField label="Username" variant="filled" required
-                                
                                 sx={{
                                     "& .MuiInputLabel-root": {
                                         color:"var(--color-1)"
