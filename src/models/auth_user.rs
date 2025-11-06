@@ -5,6 +5,10 @@ use tokio::{self, time::{Duration, sleep}};
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use tracing::error;
+use sea_orm::{ColumnTrait, EntityTrait, PaginatorTrait, QueryFilter, QuerySelect};
+
+use crate::entities::user;
+use crate::utils::database;
 
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
@@ -55,5 +59,31 @@ impl AUTH_USER {
 
         error!("[verify_user] Invalid token");
         return Err("Invalid token".to_string())?;
+    }
+
+    pub async fn add(token: &str) -> Result<UserState, String>{
+        let conn = database::get_connection().await
+            .map_err(|e| e.to_string())?;
+        let result = user::Entity::find()
+            .select_only()
+            .column(user::Column::Id)
+            .filter(user::Column::Token.eq(token))
+            .into_tuple::<String>()
+            .one(&conn).await
+            .map_err(|e| e.to_string())?;
+
+        if let Some(user_id) = result {
+            let current_timestamp = Utc::now().timestamp_millis() as usize;
+            let new_user_state = UserState{
+                user_id,
+                last_use_count: 0,
+                last_use_timestamp: current_timestamp,
+                timestamp: current_timestamp
+            };
+            AUTH_USER.insert(token.to_string(), new_user_state.clone());
+            return Ok(new_user_state);
+        }else{
+            return Err("Invalid token.".to_string())?;
+        }
     }
 }

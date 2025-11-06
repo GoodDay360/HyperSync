@@ -1,0 +1,67 @@
+use axum::{
+    response::{Json as JsonResponse},
+    extract::Json,
+    http::{StatusCode, HeaderMap},
+};
+use serde::{Deserialize, Serialize};
+use serde_json::{Value};
+
+use serde_json::{to_string};
+use sea_orm::{ColumnTrait, EntityTrait, PaginatorTrait, QueryFilter, QuerySelect};
+use chrono::Utc;
+
+use crate::entities::user;
+use crate::utils::database;
+use crate::models::auth_user::{AUTH_USER, UserState};
+use crate::models::error::ErrorResponse;
+use crate::models::watch_state::{CACHE_WATCH_STATE};
+
+
+
+#[derive(Deserialize, Serialize, Debug, Clone)]
+pub struct Payload {
+    source: String,
+    id: String,
+    season_index: usize,
+    episode_index: usize,
+    current_time: f64,
+    timestamp: usize
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Response {
+    status: bool
+}
+
+
+pub async fn new(headers: HeaderMap, Json(payload): Json<Payload>) -> Result<JsonResponse<Response>, ErrorResponse>{
+    let mut token:String = "".to_string();
+    if let Some(auth_header) = headers.get("authorization") {
+        if let Ok(auth_str) = auth_header.to_str() {
+            token = auth_str.to_string();
+        }
+    }
+
+    if token.is_empty() {
+        return Err(ErrorResponse{status: 500, message: "Missing user token.".to_string()});
+    }
+
+    let user_state = match AUTH_USER::verify(&token) {
+        Ok(user_state) => {user_state},
+        Err(_) => {
+            AUTH_USER::add(&token).await.map_err(|e| ErrorResponse{status:500, message: e.to_string()})?
+        }
+    };
+
+    CACHE_WATCH_STATE::add(
+        &user_state.user_id,
+        &payload.source,
+        &payload.id,
+        payload.season_index,
+        payload.episode_index,
+        payload.current_time,
+        payload.timestamp
+    );
+
+    return Ok(JsonResponse(Response{status: true}));
+}

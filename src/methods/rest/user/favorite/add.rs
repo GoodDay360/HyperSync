@@ -13,7 +13,6 @@ use sea_orm::{
 };
 use serde_json::{json};
 use uuid::Uuid;
-use chrono::Utc;
 
 use crate::entities::{favorite::{self, Entity}, user};
 use crate::utils::database;
@@ -27,9 +26,9 @@ pub struct Payload {
     source: String,
     id: String,
     tags: Vec<String>,
-    current_watch_season_index: usize,
-    current_watch_episode_index: usize,
-
+    current_watch_season_index: Option<i32>,
+    current_watch_episode_index: Option<i32>,
+    timestamp: usize,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -43,7 +42,6 @@ pub async fn new(headers: HeaderMap, Json(payload): Json<Payload>) -> Result<Jso
     if let Some(auth_header) = headers.get("authorization") {
         if let Ok(auth_str) = auth_header.to_str() {
             token = auth_str.to_string();
-            println!("auth_str: {}", auth_str);
         }
     }
 
@@ -76,9 +74,11 @@ pub async fn new(headers: HeaderMap, Json(payload): Json<Payload>) -> Result<Jso
         if let Some(favorite_id) = result {
             favorite::Entity::update_many()
                 .col_expr(favorite::Column::Tags, Expr::value(json!(&payload.tags)))
-                .col_expr(favorite::Column::CurrentWatchSeasonIndex, Expr::value(payload.current_watch_season_index as i32))
-                .col_expr(favorite::Column::CurrentWatchEpisodeIndex, Expr::value(payload.current_watch_episode_index as i32))
+                .col_expr(favorite::Column::CurrentWatchSeasonIndex, Expr::value(payload.current_watch_season_index))
+                .col_expr(favorite::Column::CurrentWatchEpisodeIndex, Expr::value(payload.current_watch_episode_index))
+                .col_expr(favorite::Column::Timestamp, Expr::value(payload.timestamp as i64))
                 .filter(favorite::Column::FavoriteId.eq(favorite_id))
+                .filter(favorite::Column::Timestamp.lt(payload.timestamp as i64))
                 .exec(&conn)
                 .await.map_err(|e| ErrorResponse{status: 500, message: e.to_string()})?;
             return Ok(JsonResponse(Response{status: true}));
@@ -98,9 +98,9 @@ pub async fn new(headers: HeaderMap, Json(payload): Json<Payload>) -> Result<Jso
                     source: Set(payload.source),
                     id: Set(payload.id),
                     tags: Set(json!(&payload.tags)),
-                    current_watch_season_index: Set(payload.current_watch_season_index as i32),
-                    current_watch_episode_index: Set(payload.current_watch_episode_index as i32),
-                    timestamp: Set(Utc::now().timestamp_millis()),
+                    current_watch_season_index: Set(payload.current_watch_season_index),
+                    current_watch_episode_index: Set(payload.current_watch_episode_index),
+                    timestamp: Set(payload.timestamp as i64),
                 }
                     .insert(&conn)
                     .await.map_err(|e| ErrorResponse{status: 500, message: e.to_string()})?;

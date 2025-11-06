@@ -16,9 +16,9 @@ impl MigrationTrait for Migration {
                     .col(string(Favorite::Source).not_null())
                     .col(string(Favorite::Id).not_null())
                     .col(json(Favorite::Tags))
-                    .col(integer(Favorite::CurrentWatchSeasonIndex))
-                    .col(integer(Favorite::CurrentWatchEpisodeIndex))
-                    .col(big_integer(Favorite::Timestamp))
+                    .col(integer(Favorite::CurrentWatchSeasonIndex).null())
+                    .col(integer(Favorite::CurrentWatchEpisodeIndex).null())
+                    .col(big_integer(Favorite::Timestamp).not_null())
                     .index(
                         Index::create()
                             .name("userid_source_id")

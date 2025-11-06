@@ -102,20 +102,20 @@ async fn main() {
     /* --- */
 
     /* Setup Socket Route */
-    let (socket_layer, socket_io) = SocketIo::builder()
-        .max_payload(3 * 1024)
-        .build_layer();
+    // let (socket_layer, socket_io) = SocketIo::builder()
+    //     .max_payload(3 * 1024)
+    //     .build_layer();
     
 
-    match routes::socket::new(socket_io) {
-        Ok(_) => {},
-        Err(e) => {
-            error!("[SOCKET ROUTES] {}", e);
-            std::process::exit(0);
-        },
-    }
+    // match routes::socket::new(socket_io) {
+    //     Ok(_) => {},
+    //     Err(e) => {
+    //         error!("[SOCKET ROUTES] {}", e);
+    //         std::process::exit(0);
+    //     },
+    // }
 
-    app = app.layer(socket_layer);
+    // app = app.layer(socket_layer);
 
     /* --- */
     

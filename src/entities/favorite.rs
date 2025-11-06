@@ -11,8 +11,8 @@ pub struct Model {
     pub source: String,
     pub id: String,
     pub tags: Json,
-    pub current_watch_season_index: i32,
-    pub current_watch_episode_index: i32,
+    pub current_watch_season_index: Option<i32>,
+    pub current_watch_episode_index: Option<i32>,
     pub timestamp: i64,
 }
 

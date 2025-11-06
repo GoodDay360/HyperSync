@@ -19,7 +19,8 @@ pub async fn new(app: Router) -> Result<Router, String> {
                 .route("/add", post(user::favorite::add::new))
             )
             .nest("/watch_state", Router::new()
-                .route("/auth_user", post(user::watch_state::auth_user))
+                .route("/add", post(user::watch_state::add::new))
+                .route("/get", post(user::watch_state::get::new))
             )
         )
         

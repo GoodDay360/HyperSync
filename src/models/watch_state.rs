@@ -62,7 +62,6 @@ lazy_static! {
 
 impl CACHE_WATCH_STATE {
     
-
     pub fn spawn_worker() {
         tokio::spawn(async move { 
             loop {
@@ -106,11 +105,10 @@ impl CACHE_WATCH_STATE {
                             }
                         }
                     }
-
                 }
                 
                 CACHE_WATCH_STATE.retain(|_, value| value.timestamp > current_timestamp);
-                sleep(Duration::from_secs(30)).await;
+                sleep(Duration::from_secs(10)).await;
             }
         });
     }
@@ -163,6 +161,7 @@ pub async fn upload_watch_state(
         .column(watch_state::Column::Timestamp)
         .filter(
             Condition::all()
+                .add(watch_state::Column::UserId.eq(user_id.to_string()))
                 .add(watch_state::Column::Source.eq(source.to_string()))
                 .add(watch_state::Column::Id.eq(id.to_string()))
                 .add(watch_state::Column::SeasonIndex.eq(season_index as i32))
@@ -192,6 +191,7 @@ pub async fn upload_watch_state(
     watch_state::Entity::insert(new_watch_state)
         .on_conflict(
             OnConflict::columns([
+                watch_state::Column::UserId,
                 watch_state::Column::Source,
                 watch_state::Column::Id,
                 watch_state::Column::SeasonIndex,
