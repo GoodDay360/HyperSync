@@ -19,7 +19,7 @@ use socketioxide::{
     SocketIo,
 };
 
-use tokio::{self, time::Duration};
+use tokio::{self, time::{Duration, sleep}};
 use std::sync::Arc;
 use std::env;
 
@@ -28,6 +28,7 @@ pub mod utils;
 pub mod configs;
 pub mod models;
 
+pub mod middleware;
 pub mod routes;
 pub mod methods;
 
@@ -62,7 +63,7 @@ async fn main() {
     
     /* Setup Rest Routes */
     let governor_conf = GovernorConfigBuilder::default()
-        .period(Duration::from_secs(10))
+        .period(Duration::from_secs(5))
         .burst_size(30)
         .key_extractor(SmartIpKeyExtractor)
         .finish()
@@ -73,7 +74,7 @@ async fn main() {
     tokio::spawn(async move {
         let interval = Duration::from_secs(60);
         loop {
-            std::thread::sleep(interval);
+            sleep(interval).await;
             tracing::info!("[Default] rate limiting storage size: {}", governor_limiter.len());
             governor_limiter.retain_recent();
         }

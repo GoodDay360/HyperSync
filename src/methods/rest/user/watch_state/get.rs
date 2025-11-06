@@ -39,16 +39,11 @@ pub struct Response {
 }
 
 pub async fn new(headers: HeaderMap, Json(payload): Json<Payload>) -> Result<JsonResponse<Response>, ErrorResponse>{
-    let mut token:String = "".to_string();
-    if let Some(auth_header) = headers.get("authorization") {
-        if let Ok(auth_str) = auth_header.to_str() {
-            token = auth_str.to_string();
-        }
-    }
-
-    if token.is_empty() {
-        return Err(ErrorResponse{status: 500, message: "Missing user token.".to_string()});
-    }
+    let token = headers.get("authorization")
+        .ok_or("Missing user token.")
+        .map_err(|e| ErrorResponse{status:500, message: e.to_string()})?
+        .to_str()
+        .map_err(|e| ErrorResponse{status:500, message: e.to_string()})?;
 
 
     let conn = database::get_connection().await
@@ -65,7 +60,7 @@ pub async fn new(headers: HeaderMap, Json(payload): Json<Payload>) -> Result<Jso
         .select_only()
         .column(watch_state::Column::CurrentTime)
         .column(watch_state::Column::Timestamp)
-        .filter(user::Column::Token.eq(&token))
+        .filter(user::Column::Token.eq(token))
         .filter(
             Condition::all()
                 .add(watch_state::Column::Source.eq(payload.source))

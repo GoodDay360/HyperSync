@@ -4,7 +4,7 @@ use dashmap::DashMap;
 use tokio::{self, time::{Duration, sleep}};
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
-use tracing::error;
+use tracing::{error, info};
 use sea_orm::{ColumnTrait, EntityTrait, PaginatorTrait, QueryFilter, QuerySelect};
 
 use crate::entities::user;
@@ -40,25 +40,29 @@ impl AUTH_USER {
         });
     }
     
-    pub fn verify(token: &str) -> Result<UserState, String> {
+    pub fn verify(token: &str) -> Result<Option<UserState>, String> {
         if let Some(mut auth_user) = AUTH_USER.get_mut(token) {
             let current_timpstamp = Utc::now().timestamp_millis() as usize;
             if (current_timpstamp - (*auth_user).timestamp) <= MAX_LIFE {
                 if current_timpstamp - (*auth_user).last_use_timestamp <= MAX_PER_USE_INTERVAL {
                     if (*auth_user).last_use_count < MAX_PER_USE_COUNT {
                         (*auth_user).last_use_count += 1;
-                        return Ok(auth_user.clone());
+                        info!("last use count: {}", (*auth_user).last_use_count);
+                        return Ok(Some(auth_user.clone()));
+                    }else{
+                        error!("[auth_user:verify] exceed token max per use count.");
+                        return Ok(None);
                     }
                 }else{
                     (*auth_user).last_use_count = 0;
                     (*auth_user).last_use_timestamp = current_timpstamp;
-                    return Ok(auth_user.clone());
+                    return Ok(Some(auth_user.clone()));
                 }
             }
         }
 
-        error!("[verify_user] Invalid token");
-        return Err("Invalid token".to_string())?;
+        error!("[auth_user:verify] Invalid token.");
+        return Err("Invalid token.".to_string())?;
     }
 
     pub async fn add(token: &str) -> Result<UserState, String>{
@@ -83,7 +87,8 @@ impl AUTH_USER {
             AUTH_USER.insert(token.to_string(), new_user_state.clone());
             return Ok(new_user_state);
         }else{
-            return Err("Invalid token.".to_string())?;
+            error!("[auth_user:add] Invalid token.");
+            return Err("[auth_user:add] Invalid token.".to_string())?;
         }
     }
 }
