@@ -45,7 +45,7 @@ pub async fn new(app: Router) -> Result<Router, String> {
         )
         .nest("/user", Router::new()
             .route("/login", post(user::login::new))
-            .route("/change_password", post(user::chaneg_password::new))
+            .route("/change_password", post(user::change_password::new))
             .nest("/favorite", Router::new()
                 .route("/add", post(user::favorite::add::new))
                 .route_layer(middleware::from_fn(auth_user::new))
