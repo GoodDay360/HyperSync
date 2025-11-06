@@ -30,7 +30,8 @@ pub async fn verify(token: &str) -> Result<bool, ErrorResponse> {
     let admin_password = &env_config.admin_password;
 
     
-    let decrypted = decrypt::new(token)?;
+    let decrypted = decrypt::new(token)
+        .map_err(|e| ErrorResponse{status: 500, message: e.to_string()})?;
 
     let creds: Credentials = from_slice(&decrypted)
         .map_err(|e| ErrorResponse{status: 500, message: e.to_string()})?;

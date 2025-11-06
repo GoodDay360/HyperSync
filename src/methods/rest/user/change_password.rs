@@ -69,7 +69,10 @@ pub async fn new(headers: HeaderMap, Json(payload): Json<Payload>) -> Result<Jso
     let user_id: String;
     let user_email: String;
     if let Some((password, id, email)) = result {
-        let decrypt_password = String::from_utf8(decrypt::new(&password)?)
+        let decrypt_password = String::from_utf8(
+            decrypt::new(&password)
+                .map_err(|e| ErrorResponse{status: 500, message: e})?
+        )
             .map_err(|e| ErrorResponse{status: 500, message: e.to_string()})?;
 
         if decrypt_password == payload.current_password {
@@ -94,10 +97,12 @@ pub async fn new(headers: HeaderMap, Json(payload): Json<Payload>) -> Result<Jso
         let creds_to_string = to_string(&creds)
             .map_err(|e| ErrorResponse{status: 500, message: e.to_string()})?;
 
-        let new_token = encrypt::new(&creds_to_string.as_bytes())?;
+        let new_token = encrypt::new(&creds_to_string.as_bytes())
+            .map_err(|e| ErrorResponse{status: 500, message: e})?;
         /* --- */
 
-        let new_encrypted_password = encrypt::new(&payload.new_password.as_bytes())?;
+        let new_encrypted_password = encrypt::new(&payload.new_password.as_bytes())
+            .map_err(|e| ErrorResponse{status: 500, message: e})?;
 
         user::Entity::update_many()
             .col_expr(user::Column::Token, Expr::value(&new_token))

@@ -46,7 +46,8 @@ pub async fn new(Json(payload): Json<Payload>) -> Result<JsonResponse<Response>,
                 message: e.to_string(),
             })?;
         
-        let token: String = encrypt::new(cred_to_string.as_bytes())?;
+        let token: String = encrypt::new(cred_to_string.as_bytes())
+            .map_err(|e| ErrorResponse{status: 500, message: e.to_string()})?;
         
         return Ok(JsonResponse(Response{
             status: true, 

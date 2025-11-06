@@ -66,9 +66,11 @@ pub async fn new(headers: HeaderMap, Json(payload): Json<Payload>) -> Result<Jso
     let creds_to_string = to_string(&creds)
         .map_err(|e| ErrorResponse{status: 500, message: e.to_string()})?;
 
-    let token = encrypt::new(&creds_to_string.as_bytes())?;
+    let token = encrypt::new(&creds_to_string.as_bytes())
+        .map_err(|e| ErrorResponse{status: 500, message: e.to_string()})?;
 
-    let encrypt_password = encrypt::new(&payload.password.as_bytes())?;
+    let encrypt_password = encrypt::new(&payload.password.as_bytes())
+        .map_err(|e| ErrorResponse{status: 500, message: e.to_string()})?;
 
     let new_user = user::ActiveModel {
         id: Set(id),

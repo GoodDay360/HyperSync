@@ -41,7 +41,10 @@ pub async fn new(Json(payload): Json<Payload>) -> Result<JsonResponse<Response>,
         .await.map_err(|e| ErrorResponse{status: 500, message: e.to_string()})?;
 
     if let Some((password, token)) = result {
-        let decrypt_password = String::from_utf8(decrypt::new(&password)?)
+        let decrypt_password = String::from_utf8(
+            decrypt::new(&password)
+                .map_err(|e| ErrorResponse{status: 500, message: e.to_string()})?
+        )
             .map_err(|e| ErrorResponse{status: 500, message: e.to_string()})?;
 
         if decrypt_password == payload.password {
