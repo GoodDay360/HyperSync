@@ -1,7 +1,7 @@
 
 use std::env;
 use dashmap::DashMap;
-use tracing::{info};
+
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
@@ -24,6 +24,7 @@ impl EnvConfig {
     pub fn init() {
         #[cfg(debug_assertions)]
         {
+            use tracing::{info};
             use dotenv::dotenv;
             dotenv().ok();
             info!("[dotenv] Loaded .env in debug mode");
