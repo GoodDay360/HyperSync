@@ -1,6 +1,6 @@
 // SolidJS Imports
 import { createSignal, onMount } from "solid-js";
-import { Router, Route, useNavigate } from "@solidjs/router";
+import { useNavigate } from "@solidjs/router";
 
 
 // SUID Imports
