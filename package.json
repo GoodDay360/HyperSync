@@ -38,7 +38,6 @@
     "eslint": "^9.38.0",
     "eslint-plugin-solid": "^0.14.5",
     "eslint-plugin-unused-imports": "^4.3.0",
-    "lru-cache": "^11.2.2",
     "path": "^0.12.7",
     "solid-js": "^1.9.5",
     "solid-toast": "^0.5.0",
@@ -46,8 +45,5 @@
     "vite": "^7.2.2",
     "vite-plugin-eslint": "^1.8.1",
     "vite-plugin-webfont-dl": "^3.11.1"
-  },
-  "overrides": {
-    "lru-cache": "^11.2.2"
   }
 }
