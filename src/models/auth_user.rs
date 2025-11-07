@@ -5,7 +5,7 @@ use tokio::{self, time::{Duration, sleep}};
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use tracing::{error, info};
-use sea_orm::{ColumnTrait, EntityTrait, PaginatorTrait, QueryFilter, QuerySelect};
+use sea_orm::{ColumnTrait, EntityTrait, QueryFilter, QuerySelect};
 
 use crate::entities::user;
 use crate::utils::database;

@@ -1,7 +1,5 @@
-use sea_orm::{DatabaseConnection, Database, Statement, ConnectionTrait};
-use lazy_static::lazy_static;
 use tracing_subscriber::FmtSubscriber;
-use tracing::{error, info};
+use tracing::{error};
 use tower_http::services::{ServeDir, ServeFile};
 use std::net::SocketAddr;
 use axum::{
@@ -14,14 +12,9 @@ use tower_governor::{
 };
 use tower_http::cors::{CorsLayer, Any};
 
-use socketioxide::{
-    extract::{AckSender, Data, SocketRef},
-    SocketIo,
-};
 
 use tokio::{self, time::{Duration, sleep}};
-use std::sync::Arc;
-use std::env;
+
 
 pub mod entities;
 pub mod utils;

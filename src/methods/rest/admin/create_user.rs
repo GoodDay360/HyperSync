@@ -1,28 +1,21 @@
-use std::f32::consts::E;
-
-use base64::{engine::general_purpose, Engine as _};
-
 use axum::{
     response::{Json as JsonResponse},
     extract::{Json},
-    http::{StatusCode, HeaderMap},
+    http::{HeaderMap},
 };
 use serde::{Deserialize, Serialize};
 use serde_json::{to_string, json};
 use sea_orm::{
-    EntityTrait, QueryFilter, ColumnTrait,
+    EntityTrait,
     ActiveValue::Set,
 };
-use orion::aead;
-use orion::kdf::SecretKey;
-use rand::random;
+
 use chrono::Utc;
 use uuid::Uuid;
 
 
 use crate::entities::user;
 use crate::utils::database;
-use crate::configs::env::EnvConfig;
 use crate::models::error::ErrorResponse;
 use crate::utils::encrypt;
 use crate::methods::rest::{admin};

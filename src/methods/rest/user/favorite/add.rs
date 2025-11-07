@@ -1,24 +1,18 @@
-
-use base64::{engine::general_purpose, Engine as _};
-
 use axum::{
     response::{Json as JsonResponse},
     extract::Json,
-    http::{StatusCode, HeaderMap},
+    http::{HeaderMap},
 };
 use serde::{Deserialize, Serialize};
-use serde_json::{to_string};
 use sea_orm::{
-    ActiveModelTrait, ActiveValue::Set, ColumnTrait, EntityTrait, QueryFilter, QuerySelect, query::JoinType, sea_query::{Expr, OnConflict}
+    ActiveModelTrait, ActiveValue::Set, ColumnTrait, EntityTrait, QueryFilter, QuerySelect, query::JoinType, sea_query::{Expr},
 };
 use serde_json::{json};
 use uuid::Uuid;
 
-use crate::entities::{favorite::{self, Entity}, user};
+use crate::entities::{favorite::{self}, user};
 use crate::utils::database;
-use crate::configs::env::EnvConfig;
 use crate::models::error::ErrorResponse;
-use crate::utils::decrypt;
 
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

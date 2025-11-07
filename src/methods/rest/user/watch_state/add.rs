@@ -1,18 +1,11 @@
 use axum::{
     response::{Json as JsonResponse},
     extract::Json,
-    http::{StatusCode, HeaderMap},
+    http::{HeaderMap},
 };
 use serde::{Deserialize, Serialize};
-use serde_json::{Value};
 
-use serde_json::{to_string};
-use sea_orm::{ColumnTrait, EntityTrait, PaginatorTrait, QueryFilter, QuerySelect};
-use chrono::Utc;
-
-use crate::entities::user;
-use crate::utils::database;
-use crate::models::auth_user::{AUTH_USER, UserState};
+use crate::models::auth_user::{AUTH_USER};
 use crate::models::error::ErrorResponse;
 use crate::models::watch_state::{CACHE_WATCH_STATE};
 

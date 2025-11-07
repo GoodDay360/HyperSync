@@ -1,31 +1,21 @@
-use socketioxide::{
-    extract::{AckSender, Data, SocketRef},
-    SocketIo,
-};
 use serde::{Deserialize, Serialize};
-use serde_json::{Value};
 
-use serde_json::{to_string};
 use sea_orm::{
-    ColumnTrait, EntityTrait, PaginatorTrait, QueryFilter, QuerySelect, Condition,
+    ColumnTrait, EntityTrait, QueryFilter, QuerySelect, Condition,
     Set
 };
 use sea_query::{OnConflict}; 
 
-use tracing::{info, error};
+use tracing::{error};
 use lazy_static::lazy_static;
 use dashmap::DashMap;
 use chrono::Utc;
 use tokio::{self, time::{Duration, sleep}};
 use uuid::Uuid;
 
-use crate::entities::{user, watch_state};
+use crate::entities::{watch_state};
 use crate::utils::database;
-use crate::configs::env::EnvConfig;
-use crate::models::error::ErrorResponse;
-use crate::utils::decrypt;
 
-use crate::models::auth_user::AUTH_USER;
 
 
 #[derive(Deserialize, Serialize, Debug, Clone)]

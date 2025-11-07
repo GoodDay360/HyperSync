@@ -1,25 +1,19 @@
-use std::f32::consts::E;
-
 use axum::{
     response::{Json as JsonResponse},
     extract::Json,
-    http::{StatusCode, HeaderMap},
+    http::{HeaderMap},
 };
 use serde::{Deserialize, Serialize};
-use serde_json::{Value};
-
-use serde_json::{to_string};
 use sea_orm::{
-    ActiveModelTrait, ActiveValue::Set, ColumnTrait, EntityTrait, QueryFilter, QuerySelect, query::JoinType, sea_query::{Expr, OnConflict},
-    Condition
+    ColumnTrait, Condition, EntityTrait, QueryFilter, QuerySelect, query::JoinType
 };
-use chrono::Utc;
+
 
 use crate::entities::{user, watch_state};
 use crate::utils::database;
-use crate::models::auth_user::{AUTH_USER, UserState};
+
 use crate::models::error::ErrorResponse;
-use crate::models::watch_state::{CACHE_WATCH_STATE};
+
 
 
 
