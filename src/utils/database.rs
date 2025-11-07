@@ -3,13 +3,17 @@ use dashmap::DashMap;
 use lazy_static::lazy_static;
 use std::env;
 
+use migration::{Migrator, MigratorTrait};
+
 
 lazy_static! {
     static ref DATABASE: DashMap<usize, DatabaseConnection> = DashMap::new();
 }
 
 pub async fn init() -> Result<(), String> {
-    get_connection().await?;
+    let conn = get_connection().await?;
+
+    Migrator::up(&conn, None).await.map_err(|e| e.to_string())?;
     
     return Ok(());
 }
@@ -25,6 +29,8 @@ pub async fn get_connection() -> Result<DatabaseConnection, String> {
     return Ok(new_conn);
 
 }
+
+
 
 
 

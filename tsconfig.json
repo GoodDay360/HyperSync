@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+    // General
+    "baseUrl": ".",
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js",
+    "target": "ESNext",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "useDefineForClassFields": true,
+    "typeRoots": ["./node_modules/@types", "./src-frontend/types"],
+
+    // Modules
+    "allowSyntheticDefaultImports": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+
+    // Type Checking & Safety
+    "strict": true,
+    "types": [],
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+
+    "paths": {
+      "*": ["./node_modules/*"],
+      "@src/*": ["./src-frontend/*"],
+    }
+  },
+  "include": ["src-frontend/", "src-frontend/types"],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}

@@ -1,0 +1,60 @@
+use sea_orm_migration::{prelude::*, schema::*};
+
+#[derive(DeriveMigrationName)]
+pub struct Migration;
+
+#[async_trait::async_trait]
+impl MigrationTrait for Migration {
+    async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+        manager
+            .create_table(
+                Table::create()
+                    .table(Favorite::Table)
+                    .if_not_exists()
+                    .col(string(Favorite::FavoriteId).unique_key().not_null().primary_key().string_len(255))
+                    .col(string(Favorite::UserId).not_null().string_len(255))
+                    .col(string(Favorite::Source).not_null().string_len(255))
+                    .col(string(Favorite::Id).not_null().string_len(255))
+                    .col(json(Favorite::Tags).not_null())
+                    .col(integer(Favorite::CurrentWatchSeasonIndex).null())
+                    .col(integer(Favorite::CurrentWatchEpisodeIndex).null())
+                    .col(big_integer(Favorite::Timestamp).not_null())
+                    .index(
+                        Index::create()
+                            .name("userid_source_id")
+                            .col(Favorite::UserId)
+                            .col(Favorite::Source)
+                            .col(Favorite::Id)
+                            .unique()
+
+                    )
+                    .foreign_key(
+                        ForeignKey::create()
+                            .from(Favorite::Table, Favorite::UserId)
+                            .to(User::Table, User::Id),
+                    )
+                    .to_owned(),
+            )
+            .await
+    }
+}
+
+#[derive(DeriveIden)]
+enum User {
+    Table,
+    Id,
+}
+
+#[derive(DeriveIden)]
+enum Favorite {
+    Table,
+    FavoriteId,
+    UserId,
+    Source,
+    Id,
+    Tags,
+    CurrentWatchSeasonIndex,
+    CurrentWatchEpisodeIndex,
+    Timestamp,
+
+}
