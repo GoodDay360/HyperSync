@@ -2,7 +2,7 @@ FROM lukemathwalker/cargo-chef:latest-rust-1 AS chef
 WORKDIR /app
 
 # Bun builder stage
-FROM oven/bun:1.1.6 AS bun-builder
+FROM oven/bun:1 AS bun-builder
 WORKDIR /app
 COPY . .
 RUN bun install && bun run build
