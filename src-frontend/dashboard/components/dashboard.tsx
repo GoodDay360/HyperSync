@@ -1,17 +1,17 @@
 // SolidJS Imports
 import { createSignal, onMount } from "solid-js";
-import { Router, Route, useNavigate } from "@solidjs/router";
+import { useNavigate } from "@solidjs/router";
 
 
 // SUID Imports
-import { createTheme, ThemeProvider } from "@suid/material/styles";
-import { TextField, Button, CircularProgress, ButtonBase, IconButton } from "@suid/material"
+
+import {  Button, CircularProgress, ButtonBase, IconButton } from "@suid/material"
 
 // SUID Icons Imports
 import MenuIcon from '@suid/icons-material/Menu';
 
 // Solid Toast
-import { Toaster, toast } from 'solid-toast';
+// import { Toaster, toast } from 'solid-toast';
 
 // Scripts Imports
 import { verify_admin_login } from "@src/app/scripts/app";

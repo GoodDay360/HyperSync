@@ -1,6 +1,14 @@
 FROM lukemathwalker/cargo-chef:latest-rust-1 AS chef
 WORKDIR /app
 
+# Bun builder stage
+FROM oven/bun:1.1.6 AS bun-builder
+WORKDIR /app
+COPY . .
+RUN bun install && bun run build
+COPY /app/dist /usr/local/bin/
+
+
 FROM chef AS planner
 COPY . .
 RUN cargo chef prepare --recipe-path recipe.json
@@ -15,7 +23,6 @@ RUN cargo build --release
 
 # We do not need the Rust toolchain to run the binary!
 FROM debian:bookworm-slim AS runtime
-WORKDIR /app
+WORKDIR /usr/local/bin
 COPY --from=builder /app/target/release/HyperSync /usr/local/bin
-EXPOSE 3000
-ENTRYPOINT ["/usr/local/bin/HyperSync"]
+ENTRYPOINT ["HyperSync"]
