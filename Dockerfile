@@ -34,5 +34,4 @@ WORKDIR /app
 COPY --from=bun-builder /app/dist /usr/local/bin/dist
 COPY --from=builder /app/target/release/HyperSync /usr/local/bin
 RUN ls -l /usr/local/bin
-EXPOSE 3000
-CMD ["/usr/local/bin/HyperSync"]
+ENTRYPOINT ["/usr/local/bin/HyperSync"]
