@@ -26,4 +26,5 @@ RUN cargo build --release
 FROM debian:bookworm-slim AS runtime
 WORKDIR /usr/local/bin
 COPY --from=builder /app/target/release/HyperSync /usr/local/bin
+EXPOSE 3000
 ENTRYPOINT ["HyperSync"]
