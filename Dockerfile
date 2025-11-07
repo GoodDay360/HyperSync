@@ -29,8 +29,9 @@ RUN cargo build --release
 
 # # We do not need the Rust toolchain to run the binary!
 FROM debian:bookworm-slim AS runtime
-WORKDIR /usr/local/bin
-COPY --from=bun-builder /app/dist /usr/local/bin
+RUN apt-get update && apt-get install -y bash
+WORKDIR /app
+COPY --from=bun-builder /app/dist /usr/local/bin/dist
 COPY --from=builder /app/target/release/HyperSync /usr/local/bin
 RUN ls -l /usr/local/bin
 EXPOSE 3000
