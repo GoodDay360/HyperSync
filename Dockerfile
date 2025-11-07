@@ -6,7 +6,6 @@ FROM oven/bun:1.1.6 AS bun-builder
 WORKDIR /app
 COPY . .
 RUN bun install && bun run build
-COPY /app/dist /usr/local/bin/
 
 
 FROM chef AS planner
@@ -25,6 +24,7 @@ RUN cargo build --release
 # We do not need the Rust toolchain to run the binary!
 FROM debian:bookworm-slim AS runtime
 WORKDIR /usr/local/bin
+COPY --from=bun-builder /app/dist /usr/local/bin
 COPY --from=builder /app/target/release/HyperSync /usr/local/bin
 RUN ls -l /usr/local/bin
 EXPOSE 3000
