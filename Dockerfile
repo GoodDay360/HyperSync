@@ -2,10 +2,16 @@ FROM lukemathwalker/cargo-chef:latest-rust-1 AS chef
 WORKDIR /app
 
 # Bun builder stage
-FROM oven/bun:1.2.23 AS bun-builder
+FROM node:22.15.0-slim AS bun-builder
+RUN apt-get update && apt-get install -y curl unzip ca-certificates && \
+    curl -fsSL https://bun.sh/install | bash && \
+    ln -s /root/.bun/bin/bun /usr/local/bin/bun
 WORKDIR /app
 COPY . .
-RUN bun install && bun run build
+
+RUN bun install 
+RUN bun run build
+
 
 
 FROM chef AS planner
@@ -21,7 +27,7 @@ RUN cargo chef cook --release --recipe-path recipe.json
 
 RUN cargo build --release
 
-# We do not need the Rust toolchain to run the binary!
+# # We do not need the Rust toolchain to run the binary!
 FROM debian:bookworm-slim AS runtime
 WORKDIR /usr/local/bin
 COPY --from=bun-builder /app/dist /usr/local/bin
