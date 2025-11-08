@@ -42,6 +42,8 @@ pub async fn new(app: Router) -> Result<Router, String> {
             .route("/login", post(admin::login::new))
             .route("/verify", post(admin::verify::new))
             .route("/create_user", post(admin::create_user::new))
+            .route("/get_all_user", post(admin::get_all_user::new))
+            .route("/delete_user", post(admin::delete_user::new))
         )
         .nest("/user", Router::new()
             .route("/login", post(user::login::new))

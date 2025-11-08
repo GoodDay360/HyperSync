@@ -25,13 +25,22 @@
     flex-direction: column;
 }
 
+.menu_header_container{
+    width: auto;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--background-1);
+}
+
 .menu_title{
     color: var(--color-1);
     font-size: calc((100vw + 100vh)/2*0.0225);
     font-family: var(--font-family);
     text-align: center;
     padding: 12px;
-    border-bottom: 2px solid var(--background-1);
+    
 }
 
 .menu_item_container{

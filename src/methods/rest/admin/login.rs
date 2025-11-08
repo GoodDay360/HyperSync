@@ -30,7 +30,7 @@ pub async fn new(Json(payload): Json<Payload>) -> Result<JsonResponse<Response>,
     let admin_username = &env_config.admin_username;
     let admin_password = &env_config.admin_password;
 
-    if (payload.username == *admin_username) && (payload.password == *admin_password) {
+    if (payload.username.trim() == *admin_username) && (payload.password.trim() == *admin_password) {
         
         let cred_to_string = to_string(&payload)
             .map_err(|e| ErrorResponse {

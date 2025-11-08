@@ -26,8 +26,14 @@ pub struct Response {
 }
 
 
-pub async fn new(Json(payload): Json<Payload>) -> Result<JsonResponse<Response>, ErrorResponse>{
+pub async fn new(Json(mut payload): Json<Payload>) -> Result<JsonResponse<Response>, ErrorResponse>{
     
+    if payload.email.is_empty() || payload.password.is_empty() {
+        return Err(ErrorResponse{status: 500, message: "Missing fields.".to_string()});
+    }
+
+    payload.email = payload.email.trim().to_string();
+
     let conn = database::get_connection().await
         .map_err(|e| ErrorResponse{status: 500, message: e.to_string()})?;
 

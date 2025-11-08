@@ -12,11 +12,12 @@ impl MigrationTrait for Migration {
                     .table(User::Table)
                     .if_not_exists()
                     .col(string(User::Id).unique_key().not_null().primary_key().string_len(255))
+                    .col(string(User::Token).unique_key().not_null().string_len(255))
                     .col(string(User::Email).unique_key().not_null().string_len(255))
                     .col(string(User::Username).not_null().string_len(255))
                     .col(string(User::Password).not_null().string_len(255))
-                    .col(string(User::Token).unique_key().not_null().string_len(255))
-                    .col(big_integer(User::Timestamp).unique_key().not_null())
+                    .col(big_integer(User::Timestamp).not_null())
+                    .col(boolean(User::Status).not_null().default(true))
                     .to_owned(),
             )
             .await
@@ -32,4 +33,5 @@ enum User {
     Password,
     Token,
     Timestamp,
+    Status,
 }

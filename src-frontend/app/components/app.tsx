@@ -1,6 +1,6 @@
 // SolidJS Imports
 import { createSignal, onMount } from "solid-js";
-import { useNavigate } from "@solidjs/router";
+import { useNavigate, useLocation } from "@solidjs/router";
 
 
 // SUID Imports
@@ -26,25 +26,38 @@ const theme = createTheme({
 });
 
 
+// Component Imports
+import Dashboard from "@src/dashboard/components/dashboard";
+
+
 
 
 export default function App() {
     const navigate = useNavigate();
+    const location = useLocation();
 
     const [is_loading, set_is_loading] = createSignal(true);
 
     const [admin_username, set_admin_username] = createSignal("");
     const [admin_password, set_admin_password] = createSignal("");
+
+    const [is_logged_in, set_is_logged_in] = createSignal(false);
     
     onMount(()=>{
+        set_is_loading(true);
+        set_is_logged_in(false);
         verify_admin_login()
             .then((state) => {
                 if (state) {
-                    navigate("/admin/dashboard");
+                    set_is_logged_in(true);
+                    if (["/admin/dashboard", "/admin"].includes(location.pathname)) {
+                        navigate("/admin/dashboard/user");
+                    }
                 }else{
                     navigate("/admin");
                 }
                 set_is_loading(false);
+                
             })
             .catch(err => {
                 console.error(err);
@@ -77,58 +90,68 @@ export default function App() {
             }
             
             {!is_loading() && 
-                <div class={styles.container}>
-                    <form class={styles.form_container}
-                        onSubmit={(e)=>{
-                            e.preventDefault();
-                            admin_login(admin_username(), admin_password())
-                                .then(() => {
-                                    navigate("/admin/dashboard");
-                                })
-                                .catch(err => {
-                                    toast.remove();
-                                    toast.error(err, {style:{color:"red"}});
-                                });
+                <>{!is_logged_in()
+                    ? <div class={styles.container}>
+                        <form class={styles.form_container}
+                            onSubmit={(e)=>{
+                                e.preventDefault();
+                                admin_login(admin_username(), admin_password())
+                                    .then(() => {
+                                        navigate("/admin/dashboard/user");
+                                        set_is_logged_in(true);
+                                    })
+                                    .catch(err => {
+                                        console.error(err);
+                                        toast.remove();
+                                        toast.error(err, {style:{color:"red"}});
+                                    });
+                            }}
+                        >
+                            <h2 class={styles.form_title}>Admin</h2>
+                            <div class={styles.input_box}>
+                                <TextField label="Username" variant="filled" required
+                                    sx={{
+                                        "& .MuiInputLabel-root": {
+                                            color:"var(--color-1)"
+                                        }
+                                    }}
+                                    inputProps={{ style: { color: "var(--color-1)" } }}
+                                    value={admin_username()}
+                                    onChange={(e)=>{
+                                        set_admin_username(e.target.value);
+                                    }}
+                                />
+                                <TextField label="Password" variant="filled" type="password" required
+                                    sx={{
+                                        "& .MuiInputLabel-root": {
+                                            color:"var(--color-1)"
+                                        }
+                                    }}
+                                    inputProps={{ style: { color: "var(--color-1)" } }}
+                                    value={admin_password()}
+                                    onChange={(e)=>{
+                                        set_admin_password(e.target.value);
+                                    }}
+                                />
+                                <Button variant="contained" color="primary" type="submit"
+                                    sx={{
+                                        fontSize: "calc((100vw + 100vh)/2*0.015)"
+                                    }}
+                                >Login</Button>
+                            </div>
+                        </form>
+                    </div>
+                    : <Dashboard
+                        onLogout={()=>{
+                            set_admin_username("");
+                            set_admin_password("");
+                            set_is_logged_in(false)
                         }}
-                    >
-                        <h2 class={styles.form_title}>Admin</h2>
-                        <div class={styles.input_box}>
-                            <TextField label="Username" variant="filled" required
-                                sx={{
-                                    "& .MuiInputLabel-root": {
-                                        color:"var(--color-1)"
-                                    }
-                                }}
-                                inputProps={{ style: { color: "var(--color-1)" } }}
-                                value={admin_username()}
-                                onChange={(e)=>{
-                                    set_admin_username(e.target.value);
-                                }}
-                            />
-                            <TextField label="Password" variant="filled" type="password" required
-                                sx={{
-                                    "& .MuiInputLabel-root": {
-                                        color:"var(--color-1)"
-                                    }
-                                }}
-                                inputProps={{ style: { color: "var(--color-1)" } }}
-                                value={admin_password()}
-                                onChange={(e)=>{
-                                    set_admin_password(e.target.value);
-                                }}
-                            />
-                            <Button variant="contained" color="primary" type="submit"
-                                sx={{
-                                    fontSize: "calc((100vw + 100vh)/2*0.015)"
-                                }}
-                            >Login</Button>
-                        </div>
-                    </form>
-                </div>
+                    />
+                }</>
             }
-
-
-            
         </div>
+
+        
     </ThemeProvider>);
 }

@@ -38,7 +38,7 @@ pub async fn new(headers: HeaderMap, Json(payload): Json<Payload>) -> Result<Jso
     let mut admin_token_verify: bool = false;
     if let Some(auth_header) = headers.get("authorization") {
         if let Ok(auth_str) = auth_header.to_str() {
-            println!("auth_str: {}", auth_str);
+            
             admin_token_verify = admin::verify::verify(auth_str).await 
                 .map_err(|e| ErrorResponse{status: 500, message: e.to_string()})?;
         }
@@ -47,6 +47,21 @@ pub async fn new(headers: HeaderMap, Json(payload): Json<Payload>) -> Result<Jso
     if !admin_token_verify {
         return Err(ErrorResponse{status: 500, message: "Invalid admin token.".to_string()});
     }
+
+    /* Verify Payload */
+
+    if payload.username.is_empty() || payload.email.is_empty() || payload.password.is_empty() {
+        return Err(ErrorResponse{status: 500, message: "Missing fields.".to_string()});
+    }
+
+    if payload.password.len() < 8 {
+        return Err(ErrorResponse{status: 500, message: "Password too short.".to_string()});
+    }
+    if payload.password.len() > 32 || payload.password.len() > 32 {
+        return Err(ErrorResponse{status: 500, message: "Password too long.".to_string()});
+    }
+
+    /* --- */
 
     let id = Uuid::now_v7().to_string().replace("-", "");
 
@@ -72,6 +87,7 @@ pub async fn new(headers: HeaderMap, Json(payload): Json<Payload>) -> Result<Jso
         password: Set(encrypt_password),
         token: Set(token),
         timestamp: Set(Utc::now().timestamp_millis()),
+        ..user::ActiveModel::default()
     };
 
     let conn = database::get_connection().await

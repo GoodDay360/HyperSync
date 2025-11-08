@@ -8,13 +8,14 @@ pub struct Model {
     #[sea_orm(primary_key, auto_increment = false, unique)]
     pub id: String,
     #[sea_orm(unique)]
+    pub token: String,
+    #[sea_orm(unique)]
     pub email: String,
     pub username: String,
     pub password: String,
     #[sea_orm(unique)]
-    pub token: String,
-    #[sea_orm(unique)]
     pub timestamp: i64,
+    pub status: i8,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
