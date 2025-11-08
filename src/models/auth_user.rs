@@ -26,7 +26,7 @@ lazy_static! {
 
 const MAX_LIFE: usize = 5 * 60 * 1000;
 
-const MAX_PER_USE_COUNT: usize = 25;
+const MAX_PER_USE_COUNT: usize = 20;
 const MAX_PER_USE_INTERVAL: usize = 5 * 1000;
 
 
