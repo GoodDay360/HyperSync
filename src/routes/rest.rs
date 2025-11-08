@@ -47,6 +47,7 @@ pub async fn new(app: Router) -> Result<Router, String> {
         )
         .nest("/user", Router::new()
             .route("/login", post(user::login::new))
+            .route("/verify", post(user::verify::new))
             .route("/change_password", post(user::change_password::new))
             .nest("/favorite", Router::new()
                 .nest("/add", Router::new()
