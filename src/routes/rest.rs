@@ -19,8 +19,8 @@ pub async fn new(app: Router) -> Result<Router, String> {
 
     /* Rate Limit Middleware */
     let governor_conf = GovernorConfigBuilder::default()
-        .period(Duration::from_secs(5))
-        .burst_size(30)
+        .per_second(10)
+        .burst_size(60)
         .key_extractor(SmartIpKeyExtractor)
         .finish()
         .unwrap();
