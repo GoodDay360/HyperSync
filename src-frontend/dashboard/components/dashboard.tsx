@@ -5,10 +5,10 @@ import { useNavigate, Route, Router, useLocation } from "@solidjs/router";
 
 // SUID Imports
 
-import {  Button, CircularProgress, ButtonBase, IconButton } from "@suid/material"
+import {  Button, CircularProgress, ButtonBase } from "@suid/material"
 
 // SUID Icons Imports
-import MenuIcon from '@suid/icons-material/Menu';
+
 
 // Solid Toast
 // import { Toaster, toast } from 'solid-toast';
