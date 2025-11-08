@@ -1,7 +1,8 @@
-use sea_orm::{DatabaseConnection, Database};
+use sea_orm::{DatabaseConnection, Database, ConnectOptions};
 use dashmap::DashMap;
 use lazy_static::lazy_static;
 use std::env;
+use tokio::{time::Duration};
 
 use migration::{Migrator, MigratorTrait};
 
@@ -24,7 +25,16 @@ pub async fn get_connection() -> Result<DatabaseConnection, String> {
         return Ok(db.clone());
     }
     let db_uri = env::var("DATABASE_URI").map_err(|e| e.to_string())?;
-    let new_conn = Database::connect(&db_uri).await.map_err(|err| err.to_string())?;
+
+    let mut options = ConnectOptions::new(db_uri);
+    options
+        .max_connections(10)
+        .min_connections(1)
+        .connect_timeout(Duration::from_secs(30))
+        .sqlx_logging(true);
+
+    let new_conn = Database::connect(options).await.map_err(|e| e.to_string())?;
+
     DATABASE.insert(0, new_conn.clone());
     return Ok(new_conn);
 
