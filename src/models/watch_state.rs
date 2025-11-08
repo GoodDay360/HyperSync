@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use sea_orm::{
-    ColumnTrait, EntityTrait, QueryFilter, QuerySelect, Condition,
+    ColumnTrait, EntityTrait, QueryFilter, QuerySelect, Condition, QueryOrder,
     Set
 };
 use sea_query::{OnConflict}; 
@@ -145,6 +145,25 @@ pub async fn upload_watch_state(
     timestamp: usize
 ) -> Result<(), String> {
     let conn = database::get_connection().await?;
+
+    let outdated_watch_states = watch_state::Entity::find()
+        .select_only()
+        .column(watch_state::Column::Id)
+        .filter(watch_state::Column::UserId.eq(user_id))
+        .order_by_desc(watch_state::Column::Timestamp)
+        .offset(100)
+        .into_tuple::<String>() 
+        .all(&conn)
+        .await
+        .map_err(|e| format!("Failed to fetch rows: {}", e))?;
+
+    if outdated_watch_states.len() > 0 {
+        watch_state::Entity::delete_many()
+            .filter(watch_state::Column::Id.is_in(outdated_watch_states))
+            .exec(&conn)
+            .await
+            .map_err(|e| format!("Failed to delete rows: {}", e))?;
+    }
 
     let result = watch_state::Entity::find()
         .select_only()
