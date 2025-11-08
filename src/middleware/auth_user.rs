@@ -18,7 +18,6 @@ pub async fn new(
         .to_str()
         .map_err(|_| StatusCode::UNAUTHORIZED)?;
 
-    println!("token: {}", token);
 
     match AUTH_USER::verify(&token) {
         Ok(user_state) => {
