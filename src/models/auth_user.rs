@@ -26,8 +26,8 @@ lazy_static! {
 
 const MAX_LIFE: usize = 5 * 60 * 1000;
 
-const MAX_PER_USE_COUNT: usize = 5;
-const MAX_PER_USE_INTERVAL: usize = 10 * 1000;
+const MAX_PER_USE_COUNT: usize = 30;
+const MAX_PER_USE_INTERVAL: usize = 5 * 1000;
 
 
 impl AUTH_USER {
