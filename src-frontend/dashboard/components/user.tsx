@@ -140,45 +140,47 @@ export default function User() {
             </div>
 
             <div class={styles.body_container}>
-                <table class={styles.table}>
-                    <thead>
-                        <tr>
-                            <th><BackspaceRoundedIcon color="error" fontSize="inherit"/></th>
-                            <th>Email</th>
-                            <th>Username</th>
-                            <th>Status</th>
-                            <th>Datetime</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <For each={USER_DATA()}>
-                            {(item) => (
-                                <tr>
-                                    <td>
-                                        <Checkbox 
-                                            sx={{
-                                                color: "var(--color-1)"
-                                            }}
-                                            value={delete_user_id().includes(item.id)}
-                                            onChange={(e)=>{
-                                                if (e.target.checked) {
-                                                    set_delete_user_id([...delete_user_id(), item.id]);
-                                                }else{
-                                                    set_delete_user_id(delete_user_id().filter(id => id !== item.id));
-                                                }
-                                            }}
-                                        />
-                                        
-                                    </td>
-                                    <td>{item.email}</td>
-                                    <td>{item.username}</td>
-                                    <td>{String(item.status)}</td>
-                                    <td>{dayjs.utc(item.timestamp).tz(dayjs.tz.guess()).format('DD MMMM YYYY | hh:mm:ss a')}</td>
-                                </tr>
-                            )}
-                        </For>
-                    </tbody>
-                </table>
+                <div class={styles.table_container}>
+                    <table class={styles.table}>
+                        <thead>
+                            <tr>
+                                <th><BackspaceRoundedIcon color="error" fontSize="inherit"/></th>
+                                <th>Email</th>
+                                <th>Username</th>
+                                <th>Status</th>
+                                <th>Datetime</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <For each={USER_DATA()}>
+                                {(item) => (
+                                    <tr>
+                                        <td>
+                                            <Checkbox 
+                                                sx={{
+                                                    color: "var(--color-1)"
+                                                }}
+                                                value={delete_user_id().includes(item.id)}
+                                                onChange={(e)=>{
+                                                    if (e.target.checked) {
+                                                        set_delete_user_id([...delete_user_id(), item.id]);
+                                                    }else{
+                                                        set_delete_user_id(delete_user_id().filter(id => id !== item.id));
+                                                    }
+                                                }}
+                                            />
+                                            
+                                        </td>
+                                        <td>{item.email}</td>
+                                        <td>{item.username}</td>
+                                        <td>{String(item.status)}</td>
+                                        <td>{dayjs.utc(item.timestamp).tz(dayjs.tz.guess()).format('DD MMMM YYYY | hh:mm:ss a')}</td>
+                                    </tr>
+                                )}
+                            </For>
+                        </tbody>
+                    </table>
+                </div>
                 <div class={styles.pagination_container}>
                     <IconButton
                         sx={{
@@ -212,6 +214,8 @@ export default function User() {
                     </IconButton>
                 </div>
             </div>
+
+            
 
         </div>
         

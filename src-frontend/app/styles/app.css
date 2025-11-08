@@ -59,21 +59,12 @@ body{
 	display: flex;
 	flex-direction: column;
 	background: var(--background-1);
-	overscroll-behavior-y: contain;
+	overflow: hidden;
 	touch-action: pan-y;
 	margin: 0;
 }
 
-input {
-	all: unset;
-	margin: 8px;
-	color: var(--color-1);
-	background: transparent;
-	font-family: var(--font-family);
-	font-size: max(12px, calc((100vw + 100vh)/2*0.02));
-	box-sizing: border-box;
-	user-select: none;
-}
+
 
 #root{
 	display: flex;
@@ -102,6 +93,17 @@ input {
 	padding-top: var(--safe-area-top, 0);
 	padding-bottom: var(--safe-area-bottom, 0);
 	overflow: hidden;
+}
+
+input {
+	all: unset;
+	margin: 8px;
+	color: var(--color-1);
+	background: transparent;
+	font-family: var(--font-family);
+	font-size: max(12px, calc((100vw + 100vh)/2*0.02));
+	box-sizing: border-box;
+	user-select: none;
 }
 
 fieldset {

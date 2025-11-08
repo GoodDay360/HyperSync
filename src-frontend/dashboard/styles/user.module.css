@@ -6,16 +6,18 @@
     flex-direction: column;
     overflow: hidden;
     box-sizing: border-box;
-
+    height: 100%;
 }
 
 .header_container{
     padding: 12px;
     width: 100%;
+    height: fit-content;
     display: flex;
     flex-direction: row;
     align-items: center;
     gap: 12px;
+    flex-shrink: 0;
 }
 
 .search_container{
@@ -33,21 +35,36 @@
 .body_container{
     display: flex;
     flex: 1;
-    overflow: hidden;
     box-sizing: border-box;
     align-items: flex-start;
     padding: 12px;
     flex-direction: column;
     justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+    max-height: 100%;
+}
+
+.table_container {
+    flex:1;
+    height: 100%;
+    max-height: 100%;
+    width: 100%;
+    display: block;
+    box-sizing: border-box;
+    overflow: auto;
 }
 
 .table {
     background: var(--background-2);
     width: 100%;
+    max-height: 100%;
     color: var(--color-1);
     font-family: var(--font-family);
     font-size: calc((100vw + 100vh)/2*0.0225);
-    table-layout: fixed;
+    table-layout: auto;
+    box-sizing: border-box;
 }
 
 .table :is(th, td) {
@@ -57,6 +74,11 @@
 
 .table thead{
     border-bottom: 2px solid var(--background-1);
+}
+
+.table tbody {
+    overflow: hidden;
+    height: 100%;
 }
 
 .table tbody tr{
@@ -70,6 +92,7 @@
     justify-content: center;
     align-items: center;
     gap: 18px;
+    padding: 12px;
 }
 
 .page_text{
