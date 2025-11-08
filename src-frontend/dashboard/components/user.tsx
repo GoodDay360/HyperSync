@@ -21,9 +21,11 @@ import { toast } from 'solid-toast';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import advancedFormat from 'dayjs/plugin/advancedFormat';
+import timezone from 'dayjs/plugin/timezone';
 
 dayjs.extend(utc);
 dayjs.extend(advancedFormat);
+dayjs.extend(timezone);
 
 // Scripts Imports
 import { get_all_users, delete_user } from "../scripts/user";
@@ -171,7 +173,7 @@ export default function User() {
                                     <td>{item.email}</td>
                                     <td>{item.username}</td>
                                     <td>{String(item.status)}</td>
-                                    <td>{dayjs.utc(item.timestamp).format('DD MMMM YYYY | hh:mm:ss a')}</td>
+                                    <td>{dayjs.utc(item.timestamp).tz(dayjs.tz.guess()).format('DD MMMM YYYY | hh:mm:ss a')}</td>
                                 </tr>
                             )}
                         </For>
