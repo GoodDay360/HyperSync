@@ -4,7 +4,7 @@ use axum::{
     http::{HeaderMap},
 };
 use serde::{Deserialize, Serialize};
-use serde_json::{to_string, json};
+use serde_json::{to_string};
 use sea_orm::{
     EntityTrait,
     ActiveValue::Set,
@@ -19,6 +19,7 @@ use crate::utils::database;
 use crate::models::error::ErrorResponse;
 use crate::utils::encrypt;
 use crate::methods::rest::{admin};
+use crate::models::user::UserCredentials;
 
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -65,11 +66,11 @@ pub async fn new(headers: HeaderMap, Json(payload): Json<Payload>) -> Result<Jso
 
     let id = Uuid::now_v7().to_string().replace("-", "");
 
-    let creds = json!({
-        "id": &id,
-        "email": &payload.email,
-        "password": &payload.password
-    });
+    let creds = UserCredentials {
+        id: id.clone(),
+        email: payload.email.clone(),
+        password: payload.password.clone(),
+    };
 
     let creds_to_string = to_string(&creds)
         .map_err(|e| ErrorResponse{status: 500, message: e.to_string()})?;

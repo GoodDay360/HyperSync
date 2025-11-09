@@ -1,6 +1,7 @@
 use tracing_subscriber::FmtSubscriber;
 use tracing::{error};
 use tower_http::services::{ServeDir, ServeFile};
+use tower::{ServiceBuilder};
 use std::net::SocketAddr;
 use axum::{
     Router,
@@ -121,12 +122,14 @@ async fn main() {
         .allow_methods([Method::GET, Method::POST, Method::OPTIONS])
         .allow_headers(Any);
 
-    app = app.layer(cors);
+    app = app
+        .layer(cors)
+        .layer(ServiceBuilder::new().layer(middleware::ip_log::LogIpLayer));
     /* --- */
 
     /* Spawn Workers */
     
-    models::auth_user::AUTH_USER::spawn_worker();
+    models::user::AUTH_USER::spawn_worker();
     models::watch_state::CACHE_WATCH_STATE::spawn_worker();
 
     /* --- */

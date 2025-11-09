@@ -1,3 +1,3 @@
 pub mod error;
-pub mod auth_user;
+pub mod user;
 pub mod watch_state;

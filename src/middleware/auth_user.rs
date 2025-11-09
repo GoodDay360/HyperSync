@@ -5,7 +5,7 @@ use axum::{
     response::Response,
 };
 
-use crate::models::auth_user::AUTH_USER;
+use crate::models::user::AUTH_USER;
 
 pub async fn new(
     headers: HeaderMap,

@@ -5,7 +5,7 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::models::auth_user::{AUTH_USER};
+use crate::models::user::{AUTH_USER};
 use crate::models::error::ErrorResponse;
 use crate::models::watch_state::{CACHE_WATCH_STATE};
 

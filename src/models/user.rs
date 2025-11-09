@@ -19,6 +19,13 @@ pub struct UserState {
     pub timestamp: usize
 }
 
+#[derive(Deserialize, Serialize, Debug, Clone)]
+pub struct UserCredentials {
+    pub id: String,
+    pub email: String,
+    pub password: String,
+}
+
 lazy_static! {
     // <user_token, UserState>
     pub static ref AUTH_USER: DashMap<String, UserState> = DashMap::new();
