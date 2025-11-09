@@ -25,6 +25,7 @@ pub mod models;
 pub mod middleware;
 pub mod routes;
 pub mod methods;
+pub mod worker;
 
 
 
@@ -131,6 +132,7 @@ async fn main() {
     
     models::user::AUTH_USER::spawn_worker();
     models::watch_state::CACHE_WATCH_STATE::spawn_worker();
+    worker::favorite::clean_empty_tags::spawn_worker();
 
     /* --- */
     let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
