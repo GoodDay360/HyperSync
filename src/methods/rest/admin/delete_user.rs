@@ -44,11 +44,6 @@ pub async fn new(headers: HeaderMap, Json(payload): Json<Payload>) -> Result<Jso
     let conn = database::get_connection().await
         .map_err(|e| ErrorResponse{status: 500, message: e.to_string()})?;
 
-    user::Entity::delete_many()
-        .filter(user::Column::Id.is_in(&payload.data))
-        .exec(&conn)
-        .await
-        .map_err(|e| ErrorResponse { status: 500, message: e.to_string() })?;
 
     favorite::Entity::delete_many()
         .filter(favorite::Column::UserId.is_in(&payload.data))
@@ -58,6 +53,12 @@ pub async fn new(headers: HeaderMap, Json(payload): Json<Payload>) -> Result<Jso
 
     watch_state::Entity::delete_many()
         .filter(watch_state::Column::UserId.is_in(&payload.data))
+        .exec(&conn)
+        .await
+        .map_err(|e| ErrorResponse { status: 500, message: e.to_string() })?;
+
+    user::Entity::delete_many()
+        .filter(user::Column::Id.is_in(&payload.data))
         .exec(&conn)
         .await
         .map_err(|e| ErrorResponse { status: 500, message: e.to_string() })?;
