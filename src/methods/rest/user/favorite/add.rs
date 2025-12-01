@@ -5,7 +5,7 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 use sea_orm::{
-    ActiveModelTrait, ActiveValue::Set, ColumnTrait, EntityTrait, QueryFilter, QuerySelect, QueryOrder,
+    ActiveModelTrait, ActiveValue::Set, ColumnTrait, EntityTrait, QueryFilter, QuerySelect, PaginatorTrait,
     query::JoinType, sea_query::{Expr},
 };
 use serde_json::{json};
@@ -82,24 +82,15 @@ pub async fn new(headers: HeaderMap, Json(payload): Json<Payload>) -> Result<Jso
             .await.map_err(|e| ErrorResponse{status: 500, message: e.to_string()})?;
 
         if let Some(user_id) = user_result {
-            let outdated_favorite = favorite::Entity::find()
-                .select_only()
+            let favorite_count = favorite::Entity::find()
                 .column(favorite::Column::FavoriteId)
                 .filter(favorite::Column::UserId.eq(&user_id))
-                .order_by_desc(favorite::Column::Timestamp)
-                .offset(100)
-                .limit(100)
-                .into_tuple::<String>() 
-                .all(&conn)
+                .count(&conn)
                 .await
                 .map_err(|e| ErrorResponse{status: 500, message: e.to_string()})?;
 
-            if outdated_favorite.len() > 0 {
-                favorite::Entity::delete_many()
-                    .filter(favorite::Column::FavoriteId.is_in(outdated_favorite))
-                    .exec(&conn)
-                    .await
-                    .map_err(|e| ErrorResponse{status: 500, message: e.to_string()})?;
+            if favorite_count >= 100 {
+                return Err(ErrorResponse{status: 508, message: "Favorite limit reached.".to_string()})?;
             }
     
             favorite::ActiveModel {
