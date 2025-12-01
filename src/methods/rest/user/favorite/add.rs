@@ -5,7 +5,7 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 use sea_orm::{
-    ActiveModelTrait, ActiveValue::Set, ColumnTrait, EntityTrait, QueryFilter, QuerySelect, PaginatorTrait,
+    ActiveModelTrait, ActiveValue::Set, ColumnTrait, EntityTrait, DeleteOne, QueryFilter, QueryOrder, QuerySelect, PaginatorTrait, ConnectionTrait, DatabaseBackend,
     query::JoinType, sea_query::{Expr},
 };
 use serde_json::{json};
@@ -89,8 +89,34 @@ pub async fn new(headers: HeaderMap, Json(payload): Json<Payload>) -> Result<Jso
                 .await
                 .map_err(|e| ErrorResponse{status: 500, message: e.to_string()})?;
 
+            
+            
             if favorite_count >= 100 {
-                return Err(ErrorResponse{status: 508, message: "Favorite limit reached.".to_string()})?;
+                /*  If limit reached clean any empty favorite tags and try to insert */
+                let expr = match conn.get_database_backend() {
+                    DatabaseBackend::Postgres => Expr::cust("jsonb_array_length(tags)").eq(0),
+                    DatabaseBackend::MySql => Expr::cust("JSON_LENGTH(tags)").eq(0),
+                    DatabaseBackend::Sqlite => Expr::cust("json_array_length(tags)").eq(0),
+                };
+
+                if let Some(row) = favorite::Entity::find()
+                    .filter(expr)
+                    .filter(favorite::Column::UserId.eq(&user_id))
+                    .order_by_desc(favorite::Column::Timestamp)
+                    .one(&conn)
+                    .await
+                    .map_err(|e| ErrorResponse{status: 500, message: e.to_string()})? 
+                {
+                    let active: favorite::ActiveModel = row.into();
+                    favorite::Entity::delete(active)
+                        .exec(&conn)
+                        .await
+                        .map_err(|e| ErrorResponse{status: 500, message: e.to_string()})?;
+                }else {
+                    return Err(ErrorResponse{status: 508, message: "Favorite limit reached.".to_string()})?;
+                }
+                /* --- */
+            
             }
     
             favorite::ActiveModel {

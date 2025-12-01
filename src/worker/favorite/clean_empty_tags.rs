@@ -1,6 +1,6 @@
 use chrono::{Utc, Duration};
 use sea_orm::{
-    ColumnTrait, EntityTrait, QueryFilter,
+    ColumnTrait, EntityTrait, QueryFilter, ConnectionTrait, DatabaseBackend,
     sea_query::{Expr}
 };
 use tracing::{error, info};
@@ -17,11 +17,15 @@ pub async fn new() -> Result<(), String>{
     let conn = database::get_connection().await
         .map_err(|e| e.to_string())?;
 
+    let expr = match conn.get_database_backend() {
+        DatabaseBackend::Postgres => Expr::cust("jsonb_array_length(tags)").eq(0),
+        DatabaseBackend::MySql => Expr::cust("JSON_LENGTH(tags)").eq(0),
+        DatabaseBackend::Sqlite => Expr::cust("json_array_length(tags)").eq(0),
+    };
+
     let row = favorite::Entity::delete_many()
         .filter(favorite::Column::Timestamp.lt(threshold_timestamp))
-        .filter(
-            Expr::cust("JSON_LENGTH(tags)").eq(0)
-        )
+        .filter(expr)
         .exec(&conn)
         .await
         .map_err(|e| e.to_string())?;
