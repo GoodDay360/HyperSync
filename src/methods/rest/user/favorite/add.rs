@@ -5,7 +5,7 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 use sea_orm::{
-    ActiveModelTrait, ActiveValue::Set, ColumnTrait, EntityTrait, DeleteOne, QueryFilter, QueryOrder, QuerySelect, PaginatorTrait, ConnectionTrait, DatabaseBackend,
+    ActiveModelTrait, ActiveValue::Set, ColumnTrait, EntityTrait, QueryFilter, QueryOrder, QuerySelect, PaginatorTrait, ConnectionTrait, DatabaseBackend,
     query::JoinType, sea_query::{Expr},
 };
 use serde_json::{json};
