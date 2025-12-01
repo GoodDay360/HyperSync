@@ -5,7 +5,8 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 use sea_orm::{
-    ActiveModelTrait, ActiveValue::Set, ColumnTrait, EntityTrait, QueryFilter, QuerySelect, query::JoinType, sea_query::{Expr},
+    ActiveModelTrait, ActiveValue::Set, ColumnTrait, EntityTrait, QueryFilter, QuerySelect, QueryOrder,
+    query::JoinType, sea_query::{Expr},
 };
 use serde_json::{json};
 use uuid::Uuid;
@@ -42,6 +43,7 @@ pub async fn new(headers: HeaderMap, Json(payload): Json<Payload>) -> Result<Jso
     let conn = database::get_connection().await
         .map_err(|e| ErrorResponse{status: 500, message: e.to_string()})?;
 
+    
     let result = favorite::Entity::find()
         .join(
             JoinType::InnerJoin,
@@ -80,6 +82,26 @@ pub async fn new(headers: HeaderMap, Json(payload): Json<Payload>) -> Result<Jso
             .await.map_err(|e| ErrorResponse{status: 500, message: e.to_string()})?;
 
         if let Some(user_id) = user_result {
+            let outdated_favorite = favorite::Entity::find()
+                .select_only()
+                .column(favorite::Column::FavoriteId)
+                .filter(favorite::Column::UserId.eq(&user_id))
+                .order_by_desc(favorite::Column::Timestamp)
+                .offset(100)
+                .limit(100)
+                .into_tuple::<String>() 
+                .all(&conn)
+                .await
+                .map_err(|e| ErrorResponse{status: 500, message: e.to_string()})?;
+
+            if outdated_favorite.len() > 0 {
+                favorite::Entity::delete_many()
+                    .filter(favorite::Column::FavoriteId.is_in(outdated_favorite))
+                    .exec(&conn)
+                    .await
+                    .map_err(|e| ErrorResponse{status: 500, message: e.to_string()})?;
+            }
+    
             favorite::ActiveModel {
                 favorite_id: Set(Uuid::now_v7().to_string().replace("-", "")),
                 user_id: Set(user_id),
