@@ -83,7 +83,6 @@ pub async fn new(headers: HeaderMap, Json(payload): Json<Payload>) -> Result<Jso
 
         if let Some(user_id) = user_result {
             let favorite_count = favorite::Entity::find()
-                .column(favorite::Column::FavoriteId)
                 .filter(favorite::Column::UserId.eq(&user_id))
                 .count(&conn)
                 .await
