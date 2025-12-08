@@ -10,6 +10,7 @@ use sea_orm::{
 };
 use serde_json::{json};
 use uuid::Uuid;
+use chrono::Utc;
 
 use crate::entities::{favorite::{self}, user};
 use crate::utils::database;
@@ -66,7 +67,7 @@ pub async fn new(headers: HeaderMap, Json(payload): Json<Payload>) -> Result<Jso
             .col_expr(favorite::Column::Tags, Expr::value(json!(&payload.tags)))
             .col_expr(favorite::Column::CurrentWatchSeasonIndex, Expr::value(payload.current_watch_season_index))
             .col_expr(favorite::Column::CurrentWatchEpisodeIndex, Expr::value(payload.current_watch_episode_index))
-            .col_expr(favorite::Column::Timestamp, Expr::value(payload.timestamp as i64))
+            .col_expr(favorite::Column::Timestamp, Expr::value(Utc::now().timestamp_millis()))
             .filter(favorite::Column::FavoriteId.eq(favorite_id))
             .filter(favorite::Column::Timestamp.lt(payload.timestamp as i64))
             .exec(&conn)
@@ -126,7 +127,7 @@ pub async fn new(headers: HeaderMap, Json(payload): Json<Payload>) -> Result<Jso
                 tags: Set(json!(&payload.tags)),
                 current_watch_season_index: Set(payload.current_watch_season_index),
                 current_watch_episode_index: Set(payload.current_watch_episode_index),
-                timestamp: Set(payload.timestamp as i64),
+                timestamp: Set(Utc::now().timestamp_millis()),
             }
                 .insert(&conn)
                 .await.map_err(|e| ErrorResponse{status: 500, message: e.to_string()})?;
