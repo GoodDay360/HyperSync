@@ -6,7 +6,7 @@ use axum::{
 use serde::{Deserialize, Serialize};
 use sea_orm::{
     ActiveModelTrait, ActiveValue::Set, ColumnTrait, EntityTrait, QueryFilter, QueryOrder, QuerySelect, PaginatorTrait, ConnectionTrait, DatabaseBackend,
-    query::JoinType, sea_query::{Expr}, RelationTrait
+    query::JoinType, sea_query::{Expr}
 };
 use serde_json::{json};
 use uuid::Uuid;
@@ -88,7 +88,6 @@ pub async fn new(headers: HeaderMap, Json(payload): Json<Payload>) -> Result<Jso
 
         if let Some(user_id) = user_result {
             let favorite_count = favorite::Entity::find()
-                .join(sea_orm::JoinType::InnerJoin, favorite::Relation::User.def())
                 .filter(favorite::Column::UserId.eq(&user_id))
                 .count(&conn)
                 .await
