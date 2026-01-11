@@ -50,6 +50,8 @@ lazy_static! {
     > = DashMap::new();
 }
 
+const MAX_WATCH_STATE_PER_USER:usize = 1000;
+
 impl CACHE_WATCH_STATE {
     
     pub fn spawn_worker() {
@@ -174,8 +176,8 @@ pub async fn upload_watch_state(
         .column(watch_state::Column::WatchStateId)
         .filter(watch_state::Column::UserId.eq(user_id))
         .order_by_desc(watch_state::Column::Timestamp)
-        .offset(100)
-        .limit(100)
+        .offset(MAX_WATCH_STATE_PER_USER as u64)
+        .limit(MAX_WATCH_STATE_PER_USER as u64)
         .into_tuple::<String>() 
         .all(&conn)
         .await

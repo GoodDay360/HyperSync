@@ -4,6 +4,7 @@ use axum::{
     http::{HeaderMap},
 };
 use serde::{Deserialize, Serialize};
+use chrono::Utc;
 
 use crate::models::user::{AUTH_USER};
 use crate::models::error::ErrorResponse;
@@ -39,6 +40,7 @@ pub async fn new(headers: HeaderMap, Json(payload): Json<Payload>) -> Result<Jso
         .ok_or("Unable to use this token.")
         .map_err(|e| ErrorResponse{status:500, message: e.to_string()})?;
 
+        
     CACHE_WATCH_STATE::add(
         &user_state.user_id,
         &payload.source,
@@ -46,7 +48,7 @@ pub async fn new(headers: HeaderMap, Json(payload): Json<Payload>) -> Result<Jso
         payload.season_index,
         payload.episode_index,
         payload.current_time,
-        payload.timestamp
+        Utc::now().timestamp_millis() as usize
     );
 
     return Ok(JsonResponse(Response{status: true}));

@@ -6,7 +6,7 @@ use axum::{
 use serde::{Deserialize, Serialize};
 use sea_orm::{
     ActiveModelTrait, ActiveValue::Set, ColumnTrait, EntityTrait, QueryFilter, QueryOrder, QuerySelect, PaginatorTrait, ConnectionTrait, DatabaseBackend,
-    query::JoinType, sea_query::{Expr},
+    query::JoinType, sea_query::{Expr}, RelationTrait
 };
 use serde_json::{json};
 use uuid::Uuid;
@@ -32,6 +32,7 @@ pub struct Response {
     status: bool,
 }
 
+const MAX_FAVORITE_PER_USER:usize = 1000;
 
 pub async fn new(headers: HeaderMap, Json(payload): Json<Payload>) -> Result<JsonResponse<Response>, ErrorResponse>{
     let token = headers.get("authorization")
@@ -63,6 +64,8 @@ pub async fn new(headers: HeaderMap, Json(payload): Json<Payload>) -> Result<Jso
         .await.map_err(|e| ErrorResponse{status: 500, message: e.to_string()})?;
 
     if let Some(favorite_id) = result {
+        // If existed update it. 
+        // Only update if the payload timestamp is bigger than the saved timestamp to prevent race condition.
         favorite::Entity::update_many()
             .col_expr(favorite::Column::Tags, Expr::value(json!(&payload.tags)))
             .col_expr(favorite::Column::CurrentWatchSeasonIndex, Expr::value(payload.current_watch_season_index))
@@ -74,6 +77,7 @@ pub async fn new(headers: HeaderMap, Json(payload): Json<Payload>) -> Result<Jso
             .await.map_err(|e| ErrorResponse{status: 500, message: e.to_string()})?;
         return Ok(JsonResponse(Response{status: true}));
     }else{
+        // Get user_id from user token.
         let user_result = user::Entity::find()
             .select_only()
             .column(user::Column::Id)
@@ -84,6 +88,7 @@ pub async fn new(headers: HeaderMap, Json(payload): Json<Payload>) -> Result<Jso
 
         if let Some(user_id) = user_result {
             let favorite_count = favorite::Entity::find()
+                .join(sea_orm::JoinType::InnerJoin, favorite::Relation::User.def())
                 .filter(favorite::Column::UserId.eq(&user_id))
                 .count(&conn)
                 .await
@@ -91,7 +96,7 @@ pub async fn new(headers: HeaderMap, Json(payload): Json<Payload>) -> Result<Jso
 
             
             
-            if favorite_count >= 100 {
+            if favorite_count >= MAX_FAVORITE_PER_USER as u64 {
                 /*  If limit reached clean any empty favorite tags and try to insert */
                 let expr = match conn.get_database_backend() {
                     DatabaseBackend::Postgres => Expr::cust("jsonb_array_length(tags)").eq(0),
