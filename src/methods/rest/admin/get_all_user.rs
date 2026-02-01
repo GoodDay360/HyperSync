@@ -6,11 +6,11 @@ use axum::{
 
 use serde::{Deserialize, Serialize};
 use sea_orm::{
-    EntityTrait, QueryFilter, QuerySelect, Condition, ColumnTrait
+    EntityTrait, QueryFilter, QuerySelect, Condition, ColumnTrait, PaginatorTrait
 };
 
 
-use crate::entities::{user};
+use crate::entities::{user, favorite, watch_state};
 use crate::utils::database;
 use crate::models::error::ErrorResponse;
 use crate::methods::rest::{admin};
@@ -28,6 +28,8 @@ pub struct User {
     id: String,
     email: String,
     username: String,
+    favorite_count: usize,
+    watch_state_count: usize,
     status: bool,
     timestamp: usize
 }
@@ -82,10 +84,26 @@ pub async fn new(headers: HeaderMap, Json(payload): Json<Payload>) -> Result<Jso
     let mut result: Vec<User> = Vec::new();
     for user in users {
         
+        let favorite_count: usize = favorite::Entity::find()
+            .filter(favorite::Column::UserId.eq(&user.0))
+            .count(&conn)
+            .await
+            .map_err(|e| ErrorResponse{status: 500, message: e.to_string()})?
+            as usize;
+
+        let watch_state_count: usize = watch_state::Entity::find()
+            .filter(watch_state::Column::UserId.eq(&user.0))
+            .count(&conn)
+            .await
+            .map_err(|e| ErrorResponse{status: 500, message: e.to_string()})?
+            as usize;
+
         let new_user = User{
             id: user.0,
             email: user.1, 
             username: user.2, 
+            favorite_count: favorite_count,
+            watch_state_count: watch_state_count,
             timestamp: user.3 as usize,
             status: user.4
         };

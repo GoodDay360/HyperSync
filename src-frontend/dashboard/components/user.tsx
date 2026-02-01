@@ -147,6 +147,8 @@ export default function User() {
                                 <th><BackspaceRoundedIcon color="error" fontSize="inherit"/></th>
                                 <th>Email</th>
                                 <th>Username</th>
+                                <th>Favorite</th>
+                                <th>Watch State</th>
                                 <th>Status</th>
                                 <th>Datetime</th>
                             </tr>
@@ -173,6 +175,8 @@ export default function User() {
                                         </td>
                                         <td>{item.email}</td>
                                         <td>{item.username}</td>
+                                        <td>{item.favorite_count}</td>
+                                        <td>{item.watch_state_count}</td>
                                         <td>{String(item.status)}</td>
                                         <td>{dayjs.utc(item.timestamp).tz(dayjs.tz.guess()).format('DD MMMM YYYY | hh:mm:ss a')}</td>
                                     </tr>
